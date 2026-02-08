@@ -31,7 +31,7 @@ public sealed interface Result<V, E> {
     default V unwrap() {
         return switch (this) {
             case Success<V, E>(V value) -> value;
-            case Failure<V, E>(E error) -> throw new RuntimeException("Error: " + error);
+            case Failure<V, E>(E error) -> throw new RuntimeException("Error de unwrap: " + error);
         };
     }
 

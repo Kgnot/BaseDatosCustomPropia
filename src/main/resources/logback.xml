@@ -1,0 +1,12 @@
+<configuration>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!-- Patron: Fecha (Hora) [Hilo] Nivel Logger - Mensaje -->
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %X{transactionId} %X{client} %highlight(%-5level) %cyan(%logger{36}) - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+    </root>
+</configuration>
