@@ -29,5 +29,18 @@ public class Main {
         logger.info("Inicio de la aplicación");
         Tree<Integer, String> tree = new TreeB<>(5);
         tree.insert(new NodeElement<>(15, "xd"));
+        tree.insert(new NodeElement<>(12, "xd"));
+        tree.insert(new NodeElement<>(54, "xd"));
+        tree.insert(new NodeElement<>(5, "xd"));
+        tree.insert(new NodeElement<>(0, "xd"));
+        logger.info("Info de arbol antes de insertar 98: {}", tree);
+        tree.insert(new NodeElement<>(98, "xd"));
+        tree.insert(new NodeElement<>(153, "xd"));
+        tree.insert(new NodeElement<>(265, "xd"));
+        tree.insert(new NodeElement<>(784, "xd"));
+        tree.insert(new NodeElement<>(996, "xd"));
+        logger.info("Arbol final: {}", tree);
+
+
     }
 }

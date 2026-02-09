@@ -13,7 +13,6 @@ public final class InternalNode<K extends Comparable<K>, V> extends Node<K, V> {
     private static final Logger logger = LoggerFactory.getLogger(InternalNode.class);
 
     private List<Node<K, V>> children;
-    private boolean isLeaf; // esto no creo usarlo hmm
 
 
     public InternalNode(int maxSize) {
@@ -23,6 +22,7 @@ public final class InternalNode<K extends Comparable<K>, V> extends Node<K, V> {
 
     public InternalNode(int maxSize, List<NodeElement<K, V>> nodeElements) {
         super(maxSize, nodeElements);
+        children = new ArrayList<>();
     }
 
     @Override
@@ -35,9 +35,17 @@ public final class InternalNode<K extends Comparable<K>, V> extends Node<K, V> {
                 var childNode = children.get(i);
                 var lastElementOfChildNode = childNode.nodeElements.getLast();
                 // comparamos el ultimo elmento del hijo con el elemento a insertar
+                var insertResult = childNode.insert(element);
+
                 if (element.key().compareTo(lastElementOfChildNode.key()) < 0) {
-                    SplitResult<K, V> childSplit = childNode.insert(element).unwrap();
+                    if (insertResult.isFailure()) {
+                        return insertResult; // propagas el error
+                    }
+
+                    SplitResult<K, V> childSplit =
+                            ((Result.Success<SplitResult<K, V>, ?>) insertResult).value();
                     if (childSplit.newNode() != null) {
+                        handleChildSplit(i, childSplit);
                         logger.info("El childSplit se dividio");
                         if (isFull()) {
                             return new Result.Success<>(split()); // lo devolvemos exitoso y millonario
@@ -46,7 +54,12 @@ public final class InternalNode<K extends Comparable<K>, V> extends Node<K, V> {
                 }
                 // si el elemento a insertar es mayor que todos inserta a la derecha y ya.
                 if (i == children.size() - 1) {
-                    SplitResult<K, V> childSplit = childNode.insert(element).unwrap();
+                    if (insertResult.isFailure()) {
+                        return insertResult; // propagas el error
+                    }
+
+                    SplitResult<K, V> childSplit =
+                            ((Result.Success<SplitResult<K, V>, ?>) insertResult).value();
                     if (childSplit.newNode() != null) {
                         handleChildSplit(i, childSplit);
                         if (isFull()) return new Result.Success<>(split());
@@ -62,7 +75,7 @@ public final class InternalNode<K extends Comparable<K>, V> extends Node<K, V> {
         }
         insertInOrder(element);
         if (isFull()) {
-            split();
+            return new Result.Success<>(split());
         }
         return new Result.Success<>(new SplitResult<>(null, null));
     }
@@ -81,7 +94,7 @@ public final class InternalNode<K extends Comparable<K>, V> extends Node<K, V> {
     protected SplitResult<K, V> split() {
         logger.info("Estoy haciendo split");
         // index del medio
-        int indexMedio = Math.floorDiv(maxSize, 2) + 1;
+        int indexMedio = maxSize / 2;
         // elemento del medio
         var nodeElement = nodeElements.get(indexMedio);
         // extraigo sublistas | sublist las copia xd, mejor array:
@@ -92,9 +105,11 @@ public final class InternalNode<K extends Comparable<K>, V> extends Node<K, V> {
         Node<K, V> nodoDer = Node.createInternalNodeWithElements(maxSize, subListDer);
         if (hasChildren()) {
             logger.info("Si tiene hijos el split");
-            int childSplit = indexMedio; // dejemoslo asi por si se cambia el index medio o hay algo que no
-            ((InternalNode<K, V>) nodoIzq).children = new ArrayList<>(children.subList(0, childSplit));
-            ((InternalNode<K, V>) nodoIzq).children = new ArrayList<>(children.subList(childSplit, maxSize));
+            int childSplit = indexMedio + 1; // le sumo uno al resultado de en medio
+            ((InternalNode<K, V>) nodoIzq).children =
+                    new ArrayList<>(children.subList(0, childSplit));
+            ((InternalNode<K, V>) nodoDer).children =
+                    new ArrayList<>(children.subList(childSplit, children.size()));
 
         }
         // añado el elemento al izquierdo
@@ -124,4 +139,39 @@ public final class InternalNode<K extends Comparable<K>, V> extends Node<K, V> {
         // Insertar el nuevo hijo en la posición correcta
         children.add(index + 1, splitResult.newNode());
     }
+
+    @Override
+    protected boolean hasChildren() {
+        return children != null && !children.isEmpty();
+    }
+
+    public List<Node<K, V>> getChildren() {
+        return this.children;
+    }
+
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("InternalNode{");
+        sb.append("keys=[");
+
+        for (int i = 0; i < nodeElements.size(); i++) {
+            sb.append(nodeElements.get(i).key());
+            if (i < nodeElements.size() - 1) sb.append(", ");
+        }
+
+        sb.append("]");
+
+        if (children != null && !children.isEmpty()) {
+            sb.append(", children=").append(children.size());
+        } else {
+            sb.append(", children=0");
+        }
+
+        sb.append("}");
+        return sb.toString();
+    }
+
+
 }

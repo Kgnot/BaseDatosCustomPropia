@@ -30,6 +30,11 @@ public sealed abstract class Node<K extends Comparable<K>, V> permits InternalNo
         return new InternalNode<>(maxSize);
     }
 
+    // funciones de get
+    public void addElement(NodeElement<K, V> nodeElement) {
+        this.nodeElements.add(nodeElement);
+    }
+
     // funciones comunes
     public abstract Result<SplitResult<K, V>, NodeError.DuplicateKeyError> insert(NodeElement<K, V> element);
 
@@ -48,5 +53,24 @@ public sealed abstract class Node<K extends Comparable<K>, V> permits InternalNo
 
     protected abstract SplitResult<K, V> split();
 
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getClass().getSimpleName()).append("{");
+        sb.append("keys=[");
+
+        for (int i = 0; i < nodeElements.size(); i++) {
+            sb.append(nodeElements.get(i).key());
+            if (i < nodeElements.size() - 1) sb.append(", ");
+        }
+
+        sb.append("], ");
+        sb.append("size=").append(nodeElements.size());
+        sb.append("/").append(maxSize);
+        sb.append("}");
+
+        return sb.toString();
+    }
 
 }
