@@ -30,43 +30,21 @@ public final class InternalNode<K extends Comparable<K>, V> extends Node<K, V> {
         logger.debug("Insertaremos : {} , {}", element.key(), element.value());
         if (hasChildren()) {
             // recorremos cada hijo
-            for (int i = 0; i < children.size(); i++) {
-                //obtenemos el hijo
-                var childNode = children.get(i);
-                var lastElementOfChildNode = childNode.nodeElements.getLast();
-                // comparamos el ultimo elmento del hijo con el elemento a insertar
-                var insertResult = childNode.insert(element);
-
-                if (element.key().compareTo(lastElementOfChildNode.key()) < 0) {
-                    if (insertResult.isFailure()) {
-                        return insertResult; // propagas el error
-                    }
-
-                    SplitResult<K, V> childSplit =
-                            ((Result.Success<SplitResult<K, V>, ?>) insertResult).value();
+            int childIndex = findChildInex(element.key()); // hallamos el index al que pertenece
+            return switch (children.get(childIndex).insert(element)) {
+                case Result.Success(var childSplit) -> {
                     if (childSplit.newNode() != null) {
-                        handleChildSplit(i, childSplit);
-                        logger.info("El childSplit se dividio");
+                        handleChildSplit(childIndex, childSplit);
+                        logger.info("El childSplit se dividió");
+
                         if (isFull()) {
-                            return new Result.Success<>(split()); // lo devolvemos exitoso y millonario
+                            yield new Result.Success<>(split());
                         }
                     }
+                    yield new Result.Success<>(new SplitResult<>(null, null));
                 }
-                // si el elemento a insertar es mayor que todos inserta a la derecha y ya.
-                if (i == children.size() - 1) {
-                    if (insertResult.isFailure()) {
-                        return insertResult; // propagas el error
-                    }
-
-                    SplitResult<K, V> childSplit =
-                            ((Result.Success<SplitResult<K, V>, ?>) insertResult).value();
-                    if (childSplit.newNode() != null) {
-                        handleChildSplit(i, childSplit);
-                        if (isFull()) return new Result.Success<>(split());
-                    }
-                    return new Result.Success<>(new SplitResult<>(null, null));
-                }
-            }
+                case Result.Failure<SplitResult<K, V>, NodeError.DuplicateKeyError> failure -> failure;
+            };
         }
         for (var existing : nodeElements) {
             if (existing.key().compareTo(element.key()) == 0) {
@@ -78,6 +56,17 @@ public final class InternalNode<K extends Comparable<K>, V> extends Node<K, V> {
             return new Result.Success<>(split());
         }
         return new Result.Success<>(new SplitResult<>(null, null));
+    }
+
+    private int findChildInex(K key) {
+        for (int i = 0; i < children.size() - 1; i++) {
+            var childNode = children.get(i);
+            var lastElementOfChildNode = childNode.nodeElements.getLast();
+            if (key.compareTo(lastElementOfChildNode.key()) < 0) {
+                return i;
+            }
+        }
+        return children.size() - 1; // devolvemos el ultimo si no encontró nada
     }
 
     @Override
