@@ -58,10 +58,14 @@ public final class InternalNode<K extends Comparable<K>, V> extends Node<K, V> {
         return new Result.Success<>(new SplitResult<>(null, null));
     }
 
+    // Aqui buscamos el index de donde debería pertenecer
     private int findChildInex(K key) {
         for (int i = 0; i < children.size() - 1; i++) {
             var childNode = children.get(i);
             var lastElementOfChildNode = childNode.nodeElements.getLast();
+            if (key.compareTo(nodeElements.getFirst().key()) < 0) {
+                return 0;
+            }
             if (key.compareTo(lastElementOfChildNode.key()) < 0) {
                 return i;
             }
@@ -83,7 +87,7 @@ public final class InternalNode<K extends Comparable<K>, V> extends Node<K, V> {
     protected SplitResult<K, V> split() {
         logger.info("Estoy haciendo split");
         // index del medio
-        int indexMedio = maxSize / 2;
+        int indexMedio = maxSize / 2; // TODO, quiza la implementación sería con el nodeElements.size()
         // elemento del medio
         var nodeElement = nodeElements.get(indexMedio);
         // extraigo sublistas | sublist las copia xd, mejor array:

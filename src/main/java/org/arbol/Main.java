@@ -6,6 +6,8 @@ import org.arbol.logic.tree.TreeB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Scanner;
+
 /**
  * <h2>Arbol B</h2>
  * <p> Sea N el grado del arbol</p>
@@ -23,24 +25,32 @@ import org.slf4j.LoggerFactory;
 
 public class Main {
 
+    private static final Scanner sc = new Scanner(System.in);
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) {
         logger.info("Inicio de la aplicación");
+
         Tree<Integer, String> tree = new TreeB<>(5);
-        tree.insert(new NodeElement<>(15, "xd"));
-        tree.insert(new NodeElement<>(12, "xd"));
-        tree.insert(new NodeElement<>(54, "xd"));
-        tree.insert(new NodeElement<>(5, "xd"));
-        tree.insert(new NodeElement<>(0, "xd"));
-        logger.info("Info de arbol antes de insertar 98: {}", tree);
-        tree.insert(new NodeElement<>(98, "xd"));
-        tree.insert(new NodeElement<>(153, "xd"));
-        tree.insert(new NodeElement<>(265, "xd"));
-        tree.insert(new NodeElement<>(784, "xd"));
-        tree.insert(new NodeElement<>(996, "xd"));
-        logger.info("Arbol final: {}", tree);
 
+        while (true) {
+            System.out.print("digite un numero (q para salir): ");
+            String input = sc.nextLine();
 
+            if (input.equalsIgnoreCase("q")) {
+                break;
+            }
+
+            try {
+                int key = Integer.parseInt(input);
+                tree.insert(new NodeElement<>(key, "v" + key));
+                logger.info("Árbol actual:\n{}", tree);
+            } catch (NumberFormatException e) {
+                System.out.println("Número inválido");
+            }
+        }
+
+        logger.info("Árbol final:\n{}", tree);
     }
 }
+
