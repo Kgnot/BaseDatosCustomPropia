@@ -46,7 +46,7 @@ public class Main {
                 tree.insert(new NodeElement<>(key, "v" + key));
                 logger.info("Árbol actual:\n{}", tree);
             } catch (NumberFormatException e) {
-                System.out.println("Número inválido");
+                logger.error("Error: {}",e);
             }
         }
 
