@@ -60,17 +60,14 @@ public final class InternalNode<K extends Comparable<K>, V> extends Node<K, V> {
 
     // Aqui buscamos el index de donde debería pertenecer
     private int findChildInex(K key) {
-        for (int i = 0; i < children.size() - 1; i++) {
-            var childNode = children.get(i);
-            var lastElementOfChildNode = childNode.nodeElements.getLast();
-            if (key.compareTo(nodeElements.getFirst().key()) < 0) {
-                return 0;
-            }
-            if (key.compareTo(lastElementOfChildNode.key()) < 0) {
-                return i;
-            }
+        // Algo importante es que el hijo concuerda con los rangos del padre entonces
+        // Esto en el sistema de busqueda es muy utiiil jaja
+        int index = 0;
+        while (index < nodeElements.size() - 1 &&
+                key.compareTo(nodeElements.get(index).key()) > 0) {
+            index++;
         }
-        return children.size() - 1; // devolvemos el ultimo si no encontró nada
+        return index;
     }
 
     @Override
