@@ -84,11 +84,11 @@ public final class InternalNode<K extends Comparable<K>, V>
         return new SplitResult<>(nodeElement, nodoDer);
     }
 
-    public void insertElementAt(int index, NodeElement<K,V> element) {
+    public void insertElementAt(int index, NodeElement<K, V> element) {
         nodeElements.add(index, element);
     }
 
-    public void insertChildAt(int index, Node<K,V> child) {
+    public void insertChildAt(int index, Node<K, V> child) {
         children.add(index, child);
     }
 
@@ -97,23 +97,29 @@ public final class InternalNode<K extends Comparable<K>, V>
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("InternalNode{");
-        sb.append("keys=[");
+        sb.append("elements=[");
 
         for (int i = 0; i < nodeElements.size(); i++) {
-            sb.append(nodeElements.get(i).key());
-            if (i < nodeElements.size() - 1) sb.append(", ");
+            NodeElement<K, V> element = nodeElements.get(i);
+            sb.append("(")
+                    .append(element.key())
+                    .append(" -> ")
+                    .append(element.value())
+                    .append(")");
+
+            if (i < nodeElements.size() - 1) {
+                sb.append(", ");
+            }
         }
 
         sb.append("]");
 
-        if (children != null && !children.isEmpty()) {
-            sb.append(", children=").append(children.size());
-        } else {
-            sb.append(", children=0");
-        }
+        sb.append(", children=");
+        sb.append(children != null ? children.size() : 0);
 
         sb.append("}");
 
         return sb.toString();
     }
+
 }

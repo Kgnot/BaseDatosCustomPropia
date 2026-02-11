@@ -43,7 +43,7 @@ public class Main {
 
             try {
                 int key = Integer.parseInt(input);
-                tree.insert(new NodeElement<>(key, "v" + key));
+                tree.insert(new NodeElement<>(key, "v: " + key));
                 logger.info("Árbol actual:\n{}", tree);
             } catch (NumberFormatException e) {
                 logger.error("Error: {}", e.toString());
