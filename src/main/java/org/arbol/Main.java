@@ -31,7 +31,7 @@ public class Main {
     public static void main(String[] args) {
         logger.info("Inicio de la aplicación");
 
-        Tree<Integer, String> tree = new TreeB<>(5);
+        Tree<Integer, String> tree = new TreeB<>(3);
 
         while (true) {
             System.out.print("digite un numero (q para salir): ");
@@ -46,7 +46,7 @@ public class Main {
                 tree.insert(new NodeElement<>(key, "v" + key));
                 logger.info("Árbol actual:\n{}", tree);
             } catch (NumberFormatException e) {
-                logger.error("Error: {}",e);
+                logger.error("Error: {}", e.toString());
             }
         }
 

@@ -63,7 +63,7 @@ public final class InternalNode<K extends Comparable<K>, V> extends Node<K, V> {
         // Algo importante es que el hijo concuerda con los rangos del padre entonces
         // Esto en el sistema de busqueda es muy utiiil jaja
         int index = 0;
-        while (index < nodeElements.size() - 1 &&
+        while (index < nodeElements.size() &&
                 key.compareTo(nodeElements.get(index).key()) > 0) {
             index++;
         }
@@ -94,16 +94,19 @@ public final class InternalNode<K extends Comparable<K>, V> extends Node<K, V> {
         Node<K, V> nodoIzq = Node.createInternalNodeWithElements(maxSize, subListIzq);
         Node<K, V> nodoDer = Node.createInternalNodeWithElements(maxSize, subListDer);
         if (hasChildren()) {
-            logger.info("Si tiene hijos el split");
+            logger.info("Dentro de el split si hay hijos");
             int childSplit = indexMedio + 1; // le sumo uno al resultado de en medio
+            logger.debug("Tiene hijos, elegimos el childSplit en: {}", childSplit);
             ((InternalNode<K, V>) nodoIzq).children =
                     new ArrayList<>(children.subList(0, childSplit));
             ((InternalNode<K, V>) nodoDer).children =
                     new ArrayList<>(children.subList(childSplit, children.size()));
-
+            logger.debug("Hijos del nodo Izq: {}", ((InternalNode<K, V>) nodoIzq).children);
+            logger.debug("Hijos del nodo Der: {}", ((InternalNode<K, V>) nodoDer).children);
         }
-        // añado el elemento al izquierdo
+        // ahora mi elemento se convierte en izquierdo
         this.nodeElements = subListIzq;
+        // y mantengo los hijos izquierdos
         this.children = ((InternalNode<K, V>) nodoIzq).children;
 
         return new SplitResult<>(nodeElement, nodoDer);
