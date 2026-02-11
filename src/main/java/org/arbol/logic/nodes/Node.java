@@ -1,57 +1,69 @@
 package org.arbol.logic.nodes;
 
-import org.arbol.logic.error.NodeError;
-import org.arbol.logic.error.Result;
-
 import java.util.ArrayList;
 import java.util.List;
 
-public sealed abstract class Node<K extends Comparable<K>, V> permits InternalNode {
-    // maxSize es el número máximo de elementos que puede contener un nodo antes de dividirse
-    // es decir si el arbol es de grado 5, maxSize sería 4.
+public sealed abstract class Node<K extends Comparable<K>, V>
+        permits InternalNode {
+
+    // tamaño maximo
     protected int maxSize;
     protected List<NodeElement<K, V>> nodeElements;
 
+
     public Node(int maxSize) {
         this.maxSize = maxSize;
-        nodeElements = new ArrayList<>();
+        this.nodeElements = new ArrayList<>();
     }
 
     public Node(int maxSize, List<NodeElement<K, V>> nodeElements) {
         this.maxSize = maxSize;
         this.nodeElements = nodeElements;
     }
-
-    public static <K extends Comparable<K>, V> Node<K, V> createInternalNodeWithElements(int maxSize, List<NodeElement<K, V>> elements) {
-        return new InternalNode<>(maxSize, elements);
-    }
-
-    public static <K extends Comparable<K>, V> Node<K, V> createInternalNode(int maxSize) {
+    // Algunas funciones estaticas factory
+    public static <K extends Comparable<K>, V> Node<K, V>
+    createInternalNode(int maxSize) {
         return new InternalNode<>(maxSize);
     }
 
-    // funciones de get
+    public static <K extends Comparable<K>, V> Node<K, V>
+    createInternalNodeWithElements(int maxSize,
+                                   List<NodeElement<K, V>> elements) {
+        return new InternalNode<>(maxSize, elements);
+    }
+
+    // añadimos un elemento
     public void addElement(NodeElement<K, V> nodeElement) {
         this.nodeElements.add(nodeElement);
     }
-
-    // funciones comunes
-    public abstract Result<SplitResult<K, V>, NodeError.DuplicateKeyError> insert(NodeElement<K, V> element);
-
-    // TODO: Aqui devolvemos NodeElement para probar que se devuelve el nodo completo, aunque solo el valor es necesario, esto es para probar que se devuelve el nodo completo, aunque solo el valor es necesario
-    public abstract Result<NodeElement<K, V>, NodeError.NodeNotFoundError> search(K key);
-
-    public abstract Result<Void, NodeError.NodeNotFoundError> delete(K key);
-
-    protected boolean isFull() {
+    // Sabemos si esta lleno o no
+    public boolean isFull() {
         return nodeElements.size() >= maxSize;
     }
+    // Si este contiene alguna clave
+    public boolean containsKey(K key) {
+        return nodeElements.stream()
+                .anyMatch(e -> e.key().equals(key));
+    }
+    // Para insertar en el orden que es
+    public void insertInOrder(NodeElement<K, V> element) {
+        int index = 0;
+        // hacemos el while y comparamos con cada uno
+        while (index < nodeElements.size()
+                && element.key()
+                .compareTo(nodeElements.get(index).key()) > 0) {
+            index++;
+        }
+        // apenas aparezca lo insertamos
+        nodeElements.add(index, element);
+    }
 
-    protected boolean hasChildren() {
+    // si tiene hijos. Podriamos crear una clase "Hoja" y eliminar este metodo
+    public boolean hasChildren() {
         return !nodeElements.isEmpty();
     }
 
-    protected abstract SplitResult<K, V> split();
+    public abstract SplitResult<K, V> split();
 
 
     @Override
@@ -72,5 +84,4 @@ public sealed abstract class Node<K extends Comparable<K>, V> permits InternalNo
 
         return sb.toString();
     }
-
 }

@@ -6,6 +6,9 @@ import org.arbol.logic.nodes.InternalNode;
 import org.arbol.logic.nodes.Node;
 import org.arbol.logic.nodes.NodeElement;
 import org.arbol.logic.nodes.SplitResult;
+import org.arbol.logic.tree.operation.TreeDelete;
+import org.arbol.logic.tree.operation.TreeInsertion;
+import org.arbol.logic.tree.operation.TreeSearch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,16 +19,27 @@ public class TreeB<K extends Comparable<K>, V> extends Tree<K, V> {
 
     private static final Logger logger = LoggerFactory.getLogger(TreeB.class);
     private final int maxSize;
+    // aqui pondremos sus operaciones, insert, search y delete
+    private TreeSearch<K, V> treeSearch;
+    private TreeInsertion<K, V> treeInsertion;
+    private TreeDelete<K, V> treeDelete;
 
     public TreeB(Node<K, V> root, int maxSize) {
         super(root);
         this.maxSize = maxSize;
+        initializeOperations();
     }
 
     public TreeB(int maxSize) {
         super();
         this.maxSize = maxSize;
+        initializeOperations();
+    }
 
+    private void initializeOperations() {
+        this.treeSearch = new TreeSearch<>();
+        this.treeInsertion = new TreeInsertion<>();
+        this.treeDelete = new TreeDelete<>();
     }
 
     @Override
@@ -34,8 +48,10 @@ public class TreeB<K extends Comparable<K>, V> extends Tree<K, V> {
             root = Node.createInternalNode(maxSize);
         }
         // intentamos insertar en la raiz
-        Result<SplitResult<K, V>, NodeError.DuplicateKeyError> insertResult = root.insert(node);
+        Result<SplitResult<K, V>, NodeError.DuplicateKeyError> insertResult =
+                treeInsertion.insert(root, node, maxSize);
         if (insertResult.isFailure()) {
+            logger.error("El elemento con clave {} ya existe en el árbol", node.key());
             return insertResult.map(split -> null);
         }
         SplitResult<K, V> splitResult = insertResult.unwrap();
@@ -57,13 +73,12 @@ public class TreeB<K extends Comparable<K>, V> extends Tree<K, V> {
 
     @Override
     public Result<NodeElement<K, V>, NodeError.NodeNotFoundError> search(K key) {
-        // TODO: Aqui devolvemos NodeElement para probar que se devuelve el nodo completo, aunque solo el valor es necesario, esto es para probar que se devuelve el nodo completo, aunque solo el valor es necesario
-        return root.search(key);
+        return treeSearch.search(root, key);
     }
 
     @Override
     public Result<Void, NodeError.NodeNotFoundError> delete(K key) {
-        return root.delete(key);
+        return treeDelete.delete(root, key);
     }
 
     @Override
