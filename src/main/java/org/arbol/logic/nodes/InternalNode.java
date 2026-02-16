@@ -36,24 +36,20 @@ public final class InternalNode<K extends Comparable<K>, V>
         this.children.add(node);
     }
 
-    public List<Node<K, V>> getChildren() {
-        return this.children;
+    public void insertChildAt(int index, Node<K, V> child) {
+        this.children.add(index, child);
     }
-
     public Node<K, V> getChild(int index) {
         logger.debug("Tamaño de los hijos: {} ", children.size());
         return this.children.get(index);
     }
-
-
-    public int findChildIndex(K key) {
-        int index = 0;
-        while (index < nodeElements.size()
-                && key.compareTo(nodeElements.get(index).key()) > 0) {
-            index++;
-        }
-        return index;
+    public Node<K, V> removeChild(int index) {
+        return this.children.remove(index);
     }
+    public List<Node<K, V>> getChildren() {
+        return this.children;
+    }
+
 
 
     @Override
@@ -83,15 +79,6 @@ public final class InternalNode<K extends Comparable<K>, V>
         this.children = ((InternalNode<K, V>) nodoIzq).children;
         return new SplitResult<>(nodeElement, nodoDer);
     }
-
-    public void insertElementAt(int index, NodeElement<K, V> element) {
-        nodeElements.add(index, element);
-    }
-
-    public void insertChildAt(int index, Node<K, V> child) {
-        children.add(index, child);
-    }
-
 
     @Override
     public String toString() {

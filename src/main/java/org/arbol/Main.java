@@ -1,5 +1,7 @@
 package org.arbol;
 
+import org.arbol.logic.error.NodeError;
+import org.arbol.logic.error.Result;
 import org.arbol.logic.nodes.NodeElement;
 import org.arbol.logic.tree.Tree;
 import org.arbol.logic.tree.TreeB;
@@ -33,24 +35,98 @@ public class Main {
 
         Tree<Integer, String> tree = new TreeB<>(3);
 
-        while (true) {
-            System.out.print("digite un numero (q para salir): ");
-            String input = sc.nextLine();
+        boolean running = true;
+        while (running) {
+            System.out.println("\n===== ÁRBOL B =====");
+            System.out.println("1. Agregar elemento");
+            System.out.println("2. Eliminar elemento");
+            System.out.println("3. Buscar elemento");
+            System.out.println("4. Ver árbol");
+            System.out.println("5. Salir");
+            System.out.print("Selecciona una opción: ");
 
-            if (input.equalsIgnoreCase("q")) {
-                break;
-            }
+            String option = sc.nextLine().trim();
 
-            try {
-                int key = Integer.parseInt(input);
-                tree.insert(new NodeElement<>(key, "v: " + key));
-                logger.info("Árbol actual:\n{}", tree);
-            } catch (NumberFormatException e) {
-                logger.error("Error: {}", e.toString());
+            switch (option) {
+                case "1" -> agregarElemento(tree);
+                case "2" -> eliminarElemento(tree);
+                case "3" -> buscarElemento(tree);
+                case "4" -> verArbol(tree);
+                case "5" -> {
+                    running = false;
+                    logger.info("Árbol final:\n{}", tree);
+                }
+                default -> System.out.println("Opción inválida. Intenta de nuevo.");
             }
         }
+    }
 
-        logger.info("Árbol final:\n{}", tree);
+    private static void agregarElemento(Tree<Integer, String> tree) {
+        System.out.print("Ingresa la clave a agregar: ");
+        try {
+            int key = Integer.parseInt(sc.nextLine().trim());
+            var result = tree.insert(new NodeElement<>(key, "v: " + key));
+
+            if (result.isSuccess()) {
+                System.out.println("✓ Elemento agregado exitosamente");
+                logger.info("Elemento {} insertado en el árbol", key);
+            } else {
+                if (result instanceof Result.Failure<?, ?> failure) {
+                    System.out.println("✗ Error: " + ((NodeError) failure.error()).getMessage());
+                }
+            }
+            verArbol(tree);
+        } catch (NumberFormatException e) {
+            System.out.println("✗ Error: Debes ingresar un número válido");
+            logger.error("Error en entrada: {}", e.getMessage());
+        }
+    }
+
+    private static void eliminarElemento(Tree<Integer, String> tree) {
+        System.out.print("Ingresa la clave a eliminar: ");
+        try {
+            int key = Integer.parseInt(sc.nextLine().trim());
+            var result = tree.delete(key);
+
+            if (result.isSuccess()) {
+                System.out.println("✓ Elemento eliminado exitosamente");
+                logger.info("Elemento {} eliminado del árbol", key);
+            } else {
+                if (result instanceof Result.Failure<?, ?> failure) {
+                    System.out.println("✗ Error: " + ((NodeError) failure.error()).getMessage());
+                }
+            }
+            verArbol(tree);
+        } catch (NumberFormatException e) {
+            System.out.println("✗ Error: Debes ingresar un número válido");
+            logger.error("Error en entrada: {}", e.getMessage());
+        }
+    }
+
+    private static void buscarElemento(Tree<Integer, String> tree) {
+        System.out.print("Ingresa la clave a buscar: ");
+        try {
+            int key = Integer.parseInt(sc.nextLine().trim());
+            var result = tree.search(key);
+
+            if (result.isSuccess()) {
+                var element = result.unwrap();
+                System.out.println("✓ Elemento encontrado: Clave=" + element.key() + ", Valor=" + element.value());
+                logger.info("Elemento {} encontrado en el árbol", key);
+            } else {
+                if (result instanceof Result.Failure<?, ?> failure) {
+                    System.out.println("✗ Error: " + ((NodeError) failure.error()).getMessage());
+                }
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("✗ Error: Debes ingresar un número válido");
+            logger.error("Error en entrada: {}", e.getMessage());
+        }
+    }
+
+    private static void verArbol(Tree<Integer, String> tree) {
+        System.out.println("\n--- Estado del árbol ---");
+        System.out.println(tree);
     }
 }
 

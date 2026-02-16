@@ -24,8 +24,9 @@ public class TreeInsertion<K extends Comparable<K>, V> {
             NodeElement<K, V> element,
             int maxSize
     ) {
-        if (node instanceof InternalNode<K, V> internal && internal.hasChildren()) {
-            int index = internal.findChildIndex(element.key());
+        if (node.hasChildren()) {
+            InternalNode<K, V> internal = (InternalNode<K, V>) node;
+            int index = node.findPosition(element.key());
             logger.debug("El nodo interno es : {} ", internal);
             logger.debug("El índice del hijo a seguir es: {} ", index);
             Node<K, V> child = internal.getChild(index);
@@ -38,7 +39,7 @@ public class TreeInsertion<K extends Comparable<K>, V> {
 
             if (split.newNode() != null) {
                 // el hijo se ha dividido, hay que insertar el nuevo nodo y el elemento promovido en el nodo actual
-                internal.insertElementAt(index, split.promotedElement());
+                internal.addElementAt(index, split.promotedElement());
                 internal.insertChildAt(index + 1, split.newNode());
 
 

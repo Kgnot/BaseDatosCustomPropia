@@ -78,7 +78,7 @@ public class TreeB<K extends Comparable<K>, V> extends Tree<K, V> {
 
     @Override
     public Result<Void, NodeError.NodeNotFoundError> delete(K key) {
-        return treeDelete.delete(root, key);
+        return treeDelete.delete(root, key, maxSize);
     }
 
     @Override

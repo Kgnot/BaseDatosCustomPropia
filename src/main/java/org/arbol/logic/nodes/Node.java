@@ -18,8 +18,10 @@ public sealed abstract class Node<K extends Comparable<K>, V>
 
     public Node(int maxSize, List<NodeElement<K, V>> nodeElements) {
         this.maxSize = maxSize;
-        this.nodeElements = nodeElements;
+        this.nodeElements = new ArrayList<>();
+        this.nodeElements.addAll(nodeElements);
     }
+
     // Algunas funciones estaticas factory
     public static <K extends Comparable<K>, V> Node<K, V>
     createInternalNode(int maxSize) {
@@ -36,15 +38,12 @@ public sealed abstract class Node<K extends Comparable<K>, V>
     public void addElement(NodeElement<K, V> nodeElement) {
         this.nodeElements.add(nodeElement);
     }
-    // Sabemos si esta lleno o no
-    public boolean isFull() {
-        return nodeElements.size() >= maxSize;
+
+    //insertar en una posición:
+    public void addElementAt(int index, NodeElement<K, V> element) {
+        this.nodeElements.add(index, element);
     }
-    // Si este contiene alguna clave
-    public boolean containsKey(K key) {
-        return nodeElements.stream()
-                .anyMatch(e -> e.key().equals(key));
-    }
+
     // Para insertar en el orden que es
     public void insertInOrder(NodeElement<K, V> element) {
         int index = 0;
@@ -58,15 +57,61 @@ public sealed abstract class Node<K extends Comparable<K>, V>
         nodeElements.add(index, element);
     }
 
-    // si tiene hijos. Podriamos crear una clase "Hoja" y eliminar este metodo
-    public boolean hasChildren() {
-        return !nodeElements.isEmpty();
+    public NodeElement<K, V> getElementAt(int index) {
+        return nodeElements.get(index);
     }
+
+    public void setElementAt(int index, NodeElement<K, V> element) {
+        nodeElements.set(index, element);
+    }
+
+    public void removeElementAt(int index) {
+        nodeElements.remove(index);
+    }
+
+    // Para buscar:
+    public int findPosition(K key) {
+        int index = 0;
+        while (index < nodeElements.size() &&
+                key.compareTo(nodeElements.get(index).key()) > 0) {
+            index++;
+        }
+        return index;
+    }
+
+    // Si este contiene alguna clave
+    public boolean containsKey(K key) {
+        return nodeElements.stream()
+                .anyMatch(e -> e.key().equals(key));
+    }
+
+    public boolean isFull() {
+        return nodeElements.size() >= maxSize;
+    }
+    public boolean isEmpty() {
+        return nodeElements.isEmpty();
+    }
+
+    public int size() {
+        return nodeElements.size();
+    }
+
+    // Ya los abstractos
+    public abstract boolean hasChildren();
 
     public abstract SplitResult<K, V> split();
 
+    public List<NodeElement<K, V>> getNodeElements() {
+        return new ArrayList<>(nodeElements);
+    }
 
-    @Override
+
+
+
+    public int getMaxSize() {
+        return maxSize;
+    }
+
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(getClass().getSimpleName()).append("{");
