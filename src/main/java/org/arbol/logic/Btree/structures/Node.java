@@ -1,10 +1,10 @@
-package org.arbol.logic.nodes;
+package org.arbol.logic.Btree.structures;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public sealed abstract class Node<K extends Comparable<K>, V>
-        permits InternalNode {
+        permits InternalNode, BPlusLeafNode, BPlusInternalNode {
 
     // tamaño maximo
     protected int maxSize;

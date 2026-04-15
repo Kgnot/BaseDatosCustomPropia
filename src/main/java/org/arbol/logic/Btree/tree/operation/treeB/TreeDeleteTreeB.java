@@ -1,18 +1,20 @@
-package org.arbol.logic.tree.operation;
+package org.arbol.logic.Btree.tree.operation.treeB;
 
-import org.arbol.logic.error.NodeError;
-import org.arbol.logic.error.Result;
-import org.arbol.logic.nodes.InternalNode;
-import org.arbol.logic.nodes.Node;
-import org.arbol.logic.nodes.NodeElement;
+import org.arbol.logic.Btree.error.NodeError;
+import org.arbol.logic.Btree.tree.operation.interace.TreeDelete;
+import org.arbol.logic.utils.Result;
+import org.arbol.logic.Btree.structures.InternalNode;
+import org.arbol.logic.Btree.structures.Node;
+import org.arbol.logic.Btree.structures.NodeElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TreeDelete<K extends Comparable<K>, V> {
-    private static final Logger logger = LoggerFactory.getLogger(TreeDelete.class);
+public class TreeDeleteTreeB<K extends Comparable<K>, V> implements TreeDelete<K,V> {
+    private static final Logger logger = LoggerFactory.getLogger(TreeDeleteTreeB.class);
     private int invariante;
 
-    public Result<Void, NodeError.NodeNotFoundError> delete(Node<K, V> root, K key, int maxSize) {
+    public Result<Void, NodeError.NodeNotFoundError> execute
+            (Node<K, V> root, K key, int maxSize) {
         this.invariante = (maxSize - 1) / 2; // calculamos la invariante
         // caso base
         return deleteRecursive(root, key, maxSize);

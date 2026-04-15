@@ -1,10 +1,10 @@
 package org.arbol;
 
-import org.arbol.logic.error.NodeError;
-import org.arbol.logic.error.Result;
-import org.arbol.logic.nodes.NodeElement;
-import org.arbol.logic.tree.Tree;
-import org.arbol.logic.tree.TreeB;
+import org.arbol.logic.Btree.error.NodeError;
+import org.arbol.logic.utils.Result;
+import org.arbol.logic.Btree.structures.NodeElement;
+import org.arbol.logic.shared.Tree;
+import org.arbol.logic.Btree.tree.TreeB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,8 +71,8 @@ public class Main {
                 System.out.println("✓ Elemento agregado exitosamente");
                 logger.info("Elemento {} insertado en el árbol", key);
             } else {
-                if (result instanceof Result.Failure<?, ?> failure) {
-                    System.out.println("✗ Error: " + ((NodeError) failure.error()).getMessage());
+                if (result instanceof Result.Failure<?, ?>(Object error)) {
+                    System.out.println("✗ Error: " + ((NodeError) error).getMessage());
                 }
             }
             verArbol(tree);
@@ -114,8 +114,8 @@ public class Main {
                 System.out.println("✓ Elemento encontrado: Clave=" + element.key() + ", Valor=" + element.value());
                 logger.info("Elemento {} encontrado en el árbol", key);
             } else {
-                if (result instanceof Result.Failure<?, ?> failure) {
-                    System.out.println("✗ Error: " + ((NodeError) failure.error()).getMessage());
+                if (result instanceof Result.Failure<?, ?>(Object error)) {
+                    System.out.println("✗ Error: " + ((NodeError) error).getMessage());
                 }
             }
         } catch (NumberFormatException e) {

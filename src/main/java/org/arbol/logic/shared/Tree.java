@@ -1,9 +1,9 @@
-package org.arbol.logic.tree;
+package org.arbol.logic.shared;
 
-import org.arbol.logic.error.NodeError;
-import org.arbol.logic.error.Result;
-import org.arbol.logic.nodes.Node;
-import org.arbol.logic.nodes.NodeElement;
+import org.arbol.logic.Btree.error.NodeError;
+import org.arbol.logic.Btree.structures.NodeElement;
+import org.arbol.logic.utils.Result;
+import org.arbol.logic.Btree.structures.Node;
 
 public abstract class Tree<K extends Comparable<K>, V> {
     protected Node<K, V> root;

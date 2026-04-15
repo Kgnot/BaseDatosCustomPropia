@@ -1,4 +1,4 @@
-package org.arbol.logic.error;
+package org.arbol.logic.utils;
 
 import java.util.function.Function;
 

@@ -1,4 +1,4 @@
-package org.arbol.logic.nodes;
+package org.arbol.logic.Btree.structures;
 
 public record NodeElement<K, V>(
         K key,

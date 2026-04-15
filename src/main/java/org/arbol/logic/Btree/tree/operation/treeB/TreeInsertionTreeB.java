@@ -1,19 +1,20 @@
-package org.arbol.logic.tree.operation;
+package org.arbol.logic.Btree.tree.operation.treeB;
 
-import org.arbol.logic.error.NodeError;
-import org.arbol.logic.error.Result;
-import org.arbol.logic.nodes.InternalNode;
-import org.arbol.logic.nodes.Node;
-import org.arbol.logic.nodes.NodeElement;
-import org.arbol.logic.nodes.SplitResult;
+import org.arbol.logic.Btree.error.NodeError;
+import org.arbol.logic.Btree.tree.operation.interace.TreeInsertion;
+import org.arbol.logic.utils.Result;
+import org.arbol.logic.Btree.structures.InternalNode;
+import org.arbol.logic.Btree.structures.Node;
+import org.arbol.logic.Btree.structures.NodeElement;
+import org.arbol.logic.Btree.structures.SplitResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TreeInsertion<K extends Comparable<K>, V> {
+public class TreeInsertionTreeB<K extends Comparable<K>, V> implements TreeInsertion<K,V> {
 
-    private final Logger logger = LoggerFactory.getLogger(TreeInsertion.class);
+    private final Logger logger = LoggerFactory.getLogger(TreeInsertionTreeB.class);
 
-    public Result<SplitResult<K, V>, NodeError.DuplicateKeyError> insert
+    public Result<SplitResult<K, V>, NodeError.DuplicateKeyError> execute
             (Node<K, V> root, NodeElement<K, V> element, int maxSize) {
         return insertRecursive(root, element, maxSize);
     }
