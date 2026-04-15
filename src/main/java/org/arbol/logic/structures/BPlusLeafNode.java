@@ -1,11 +1,16 @@
-package org.arbol.logic.Btree.structures;
+package org.arbol.logic.structures;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class BPlusLeafNode<K extends Comparable<K>, V> extends Node<K, V> {
+public final class BPlusLeafNode<K extends Comparable<K> & Serializable, V extends Serializable> extends Node<K, V> {
 
     // mandamos al siguiente
+    private long pageId; // id de la página del disco
     private BPlusLeafNode<K, V> nextLeaf;
 
     public BPlusLeafNode(int maxSize) {
@@ -63,5 +68,37 @@ public final class BPlusLeafNode<K extends Comparable<K>, V> extends Node<K, V> 
     @Override
     public String toString() {
         return "LeafNode" + super.toString() + (nextLeaf != null ? " -> Next" : " -> END");
+    }
+
+    @Override
+    public byte[] serialize() {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(baos);
+
+        try {
+            // escribimos el tipo de nodo,
+            // 0-> hoja
+            // 1 -> interno
+            dos.writeInt(0);
+            // escribimos la cantidad de elementos
+            dos.writeInt(nodeElements.size());
+            // Escribimos el IUde del seiguiente
+            dos.writeLong(nextLeaf != null ? ((BPlusLeafNode<?, ?>) nextLeaf).pageId : -1L);
+
+            // escribimos cada Key y value [toca ver el tema de la serializacion de K y V] -> podemos hacer que extiendan de serializable tambien
+            for(NodeElement<K, V> nodeElement : nodeElements) {
+                dos.write(K.);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new byte[4096];
+        }
+
+        return new byte[0];
+    }
+
+    @Override
+    public byte[] deserialize(byte[] data) {
+        return new byte[0];
     }
 }

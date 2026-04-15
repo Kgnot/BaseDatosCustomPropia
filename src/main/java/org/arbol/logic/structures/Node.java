@@ -1,9 +1,10 @@
-package org.arbol.logic.Btree.structures;
+package org.arbol.logic.structures;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public sealed abstract class Node<K extends Comparable<K>, V>
+public sealed abstract class Node<K extends Comparable<K>, V> implements Serializable
         permits InternalNode, BPlusLeafNode, BPlusInternalNode {
 
     // tamaño maximo
@@ -88,6 +89,7 @@ public sealed abstract class Node<K extends Comparable<K>, V>
     public boolean isFull() {
         return nodeElements.size() >= maxSize;
     }
+
     public boolean isEmpty() {
         return nodeElements.isEmpty();
     }
@@ -104,8 +106,6 @@ public sealed abstract class Node<K extends Comparable<K>, V>
     public List<NodeElement<K, V>> getNodeElements() {
         return new ArrayList<>(nodeElements);
     }
-
-
 
 
     public int getMaxSize() {
@@ -129,4 +129,10 @@ public sealed abstract class Node<K extends Comparable<K>, V>
 
         return sb.toString();
     }
+
+    // para serializar:
+
+    public abstract byte[] serialize();
+
+    public abstract byte[] deserialize(byte[] data);
 }

@@ -1,10 +1,10 @@
-package org.arbol.logic.Btree.tree.operation.treeB;
+package org.arbol.logic.tree.operation.treeB;
 
-import org.arbol.logic.Btree.error.NodeError;
-import org.arbol.logic.Btree.tree.operation.interace.TreeSearch;
-import org.arbol.logic.utils.Result;
-import org.arbol.logic.Btree.structures.Node;
-import org.arbol.logic.Btree.structures.NodeElement;
+import org.arbol.logic.error.NodeError;
+import org.arbol.logic.tree.operation.interace.TreeSearch;
+import org.arbol.utils.Result;
+import org.arbol.logic.structures.Node;
+import org.arbol.logic.structures.NodeElement;
 
 public class TreeSearchTreeB<K extends Comparable<K>,V> implements TreeSearch<K, V> {
 

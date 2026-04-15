@@ -1,4 +1,4 @@
-package org.arbol.logic.utils;
+package org.arbol.utils;
 
 import java.util.function.Function;
 

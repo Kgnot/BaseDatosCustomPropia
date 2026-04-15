@@ -1,4 +1,4 @@
-package org.arbol.logic.Btree.error;
+package org.arbol.logic.error;
 
 public sealed interface TreeError {
 

@@ -1,4 +1,4 @@
-package org.arbol.logic.Btree.structures;
+package org.arbol.logic.structures;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +20,10 @@ public final class BPlusInternalNode<K extends Comparable<K>, V> extends Node<K,
     @Override
     public boolean hasChildren() {
         return true;
+    }
+
+    public void setChild(int index, Node<K, V> child) {
+        this.children.set(index, child);
     }
 
     public void addChild(Node<K, V> node) {

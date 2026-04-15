@@ -1,4 +1,4 @@
-package org.arbol.logic.Btree.structures;
+package org.arbol.logic.structures;
 
 public record SplitResult<K extends Comparable<K>, V>(
         NodeElement<K, V> promotedElement,

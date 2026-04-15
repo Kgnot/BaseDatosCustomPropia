@@ -1,11 +1,11 @@
-package org.arbol.logic.Btree.tree.operation.treeB;
+package org.arbol.logic.tree.operation.treeB;
 
-import org.arbol.logic.Btree.error.NodeError;
-import org.arbol.logic.Btree.tree.operation.interace.TreeDelete;
-import org.arbol.logic.utils.Result;
-import org.arbol.logic.Btree.structures.InternalNode;
-import org.arbol.logic.Btree.structures.Node;
-import org.arbol.logic.Btree.structures.NodeElement;
+import org.arbol.logic.error.NodeError;
+import org.arbol.logic.tree.operation.interace.TreeDelete;
+import org.arbol.utils.Result;
+import org.arbol.logic.structures.InternalNode;
+import org.arbol.logic.structures.Node;
+import org.arbol.logic.structures.NodeElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

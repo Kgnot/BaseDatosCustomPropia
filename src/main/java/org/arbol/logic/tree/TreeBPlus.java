@@ -1,12 +1,15 @@
-package org.arbol.logic.Btree.tree;
+package org.arbol.logic.tree;
 
-import org.arbol.logic.Btree.error.NodeError;
-import org.arbol.logic.Btree.structures.*;
-import org.arbol.logic.Btree.tree.operation.treeB.TreeDeleteTreeB;
-import org.arbol.logic.Btree.tree.operation.treeB.TreeInsertionTreeB;
-import org.arbol.logic.Btree.tree.operation.treeB.TreeSearchTreeB;
-import org.arbol.logic.shared.Tree;
-import org.arbol.logic.utils.Result;
+import org.arbol.logic.error.NodeError;
+import org.arbol.logic.structures.*;
+import org.arbol.logic.structures.Tree;
+import org.arbol.logic.tree.operation.interace.TreeDelete;
+import org.arbol.logic.tree.operation.interace.TreeInsertion;
+import org.arbol.logic.tree.operation.interace.TreeSearch;
+import org.arbol.logic.tree.operation.treeBPlus.TreeDeleteTreeBPlus;
+import org.arbol.logic.tree.operation.treeBPlus.TreeInsertionTreeBPlus;
+import org.arbol.logic.tree.operation.treeBPlus.TreeSearchTreeBPlus;
+import org.arbol.utils.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,9 +18,9 @@ public class TreeBPlus<K extends Comparable<K>, V> extends Tree<K, V> {
     private static final Logger logger = LoggerFactory.getLogger(TreeBPlus.class);
     private final int maxSize;
 
-    private TreeSearchTreeB<K, V> treeSearch;
-    private TreeInsertionTreeB<K, V> treeInsertion;
-    private TreeDeleteTreeB<K, V> treeDelete;
+    private TreeSearch<K, V> treeSearch;
+    private TreeInsertion<K, V> treeInsertion;
+    private TreeDelete<K, V> treeDelete;
 
     public TreeBPlus(Node<K, V> root, int maxSize) {
         super(root);
@@ -34,9 +37,9 @@ public class TreeBPlus<K extends Comparable<K>, V> extends Tree<K, V> {
     private void initializeOperations() {
         // NOTA: Necesitarás crear clases BPlusTreeInsertion o adaptar las existentes
         // para que gestionen correctamente la distinción entre Internal y Leaf.
-        this.treeSearch = new TreeSearchTreeB<>();
-        this.treeInsertion = new TreeInsertionTreeB<>();
-        this.treeDelete = new TreeDeleteTreeB<>();
+        this.treeSearch = new TreeSearchTreeBPlus<>();
+        this.treeInsertion = new TreeInsertionTreeBPlus<>();
+        this.treeDelete = new TreeDeleteTreeBPlus<>();
     }
 
     @Override
@@ -85,7 +88,6 @@ public class TreeBPlus<K extends Comparable<K>, V> extends Tree<K, V> {
         return treeDelete.execute(root, key, maxSize);
     }
 
-    // Método extra para B+: Recorrido secuencial de todas las hojas
     public void printAllLeaves() {
         Node<K, V> current = root;
         // Bajar hasta la hoja más a la izquierda
