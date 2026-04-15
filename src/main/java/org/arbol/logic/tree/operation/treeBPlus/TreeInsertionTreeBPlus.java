@@ -7,7 +7,9 @@ import org.arbol.utils.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TreeInsertionTreeBPlus<K extends Comparable<K>, V> implements TreeInsertion<K, V> {
+import java.io.Serializable;
+
+public class TreeInsertionTreeBPlus<K extends Comparable<K> & Serializable, V extends Serializable> implements TreeInsertion<K, V> {
 
     private static final Logger logger = LoggerFactory.getLogger(TreeInsertionTreeBPlus.class);
 

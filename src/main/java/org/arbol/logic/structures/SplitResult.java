@@ -1,6 +1,8 @@
 package org.arbol.logic.structures;
 
-public record SplitResult<K extends Comparable<K>, V>(
+import java.io.Serializable;
+
+public record   SplitResult<K extends Comparable<K> & Serializable, V extends Serializable>(
         NodeElement<K, V> promotedElement,
         Node<K, V> newNode
 ) {

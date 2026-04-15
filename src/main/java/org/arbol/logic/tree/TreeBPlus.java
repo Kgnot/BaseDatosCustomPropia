@@ -13,7 +13,9 @@ import org.arbol.utils.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TreeBPlus<K extends Comparable<K>, V> extends Tree<K, V> {
+import java.io.Serializable;
+
+public class TreeBPlus<K extends Comparable<K> & Serializable, V extends Serializable> extends Tree<K, V> {
 
     private static final Logger logger = LoggerFactory.getLogger(TreeBPlus.class);
     private final int maxSize;

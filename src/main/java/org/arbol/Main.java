@@ -3,7 +3,7 @@ package org.arbol;
 import org.arbol.logic.error.NodeError;
 import org.arbol.logic.structures.NodeElement;
 import org.arbol.logic.structures.Tree;
-import org.arbol.logic.tree.TreeBPlus;
+import org.arbol.logic.tree.TreeBPlusDisk;
 import org.arbol.utils.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,8 +25,7 @@ public class Main {
     public static void main(String[] args) {
         logger.info("Inicio de la aplicación Árbol B+");
 
-        // Instanciamos TreeBPlus con orden 3 (maxSize = 3 claves por nodo)
-        Tree<Integer, String> tree = new TreeBPlus<>(4);
+        Tree<Integer, String> tree = new TreeBPlusDisk<>("bplus-main", 4);
 
         boolean running = true;
         while (running) {
@@ -46,7 +45,7 @@ public class Main {
                 case "2" -> eliminarElemento(tree);
                 case "3" -> buscarElemento(tree);
                 case "4" -> verArbol(tree);
-                case "5" -> verHojasSecuenciales(tree);
+                case "5" -> verHojasSecuenciales();
                 case "6" -> {
                     running = false;
                     logger.info("Árbol B+ final:\n{}", tree);
@@ -130,14 +129,8 @@ public class Main {
      * Método específico para probar la lista enlazada de hojas del B+ Tree.
      * Demuestra la capacidad de recorrido secuencial optimizado.
      */
-    private static void verHojasSecuenciales(Tree<Integer, String> tree) {
+    private static void verHojasSecuenciales() {
         System.out.println("\n--- Recorrido Secuencial de Hojas (B+ Feature) ---");
-
-        // Hacemos un cast seguro porque sabemos que es TreeBPlus
-        if (tree instanceof TreeBPlus) {
-            ((TreeBPlus<Integer, String>) tree).printAllLeaves();
-        } else {
-            System.out.println("El árbol actual no es un B+ Tree");
-        }
+        System.out.println("En modo disco esta vista no está implementada aún.");
     }
 }

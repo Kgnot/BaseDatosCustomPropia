@@ -1,16 +1,13 @@
 package org.arbol.logic.structures;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.Serializable;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public final class BPlusLeafNode<K extends Comparable<K> & Serializable, V extends Serializable> extends Node<K, V> {
 
     // mandamos al siguiente
-    private long pageId; // id de la página del disco
+    private long nextLeafPageId = -1L;
     private BPlusLeafNode<K, V> nextLeaf;
 
     public BPlusLeafNode(int maxSize) {
@@ -59,10 +56,15 @@ public final class BPlusLeafNode<K extends Comparable<K> & Serializable, V exten
 
     public void setNextLeaf(BPlusLeafNode<K, V> nextLeaf) {
         this.nextLeaf = nextLeaf;
+        this.nextLeafPageId = nextLeaf != null ? nextLeaf.getPageId() : -1L;
     }
 
     public BPlusLeafNode<K, V> getNextLeaf() {
         return nextLeaf;
+    }
+
+    public long getNextLeafPageId() {
+        return nextLeafPageId;
     }
 
     @Override
@@ -73,32 +75,59 @@ public final class BPlusLeafNode<K extends Comparable<K> & Serializable, V exten
     @Override
     public byte[] serialize() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        DataOutputStream dos = new DataOutputStream(baos);
 
-        try {
-            // escribimos el tipo de nodo,
-            // 0-> hoja
-            // 1 -> interno
-            dos.writeInt(0);
-            // escribimos la cantidad de elementos
-            dos.writeInt(nodeElements.size());
-            // Escribimos el IUde del seiguiente
-            dos.writeLong(nextLeaf != null ? ((BPlusLeafNode<?, ?>) nextLeaf).pageId : -1L);
+        try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
 
-            // escribimos cada Key y value [toca ver el tema de la serializacion de K y V] -> podemos hacer que extiendan de serializable tambien
-            for(NodeElement<K, V> nodeElement : nodeElements) {
-                dos.write(K.);
+            oos.writeInt(0); // tipo nodo
+            oos.writeInt(maxSize);
+            oos.writeLong(pageId);
+            oos.writeInt(nodeElements.size());
+            oos.writeLong(nextLeaf != null ? nextLeaf.getPageId() : nextLeafPageId);
+
+            for (NodeElement<K, V> element : nodeElements) {
+                oos.writeObject(element.key());
+                oos.writeObject(element.value());
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return new byte[4096];
-        }
 
-        return new byte[0];
+            oos.flush();
+            return baos.toByteArray();
+
+        } catch (IOException e) {
+            throw new RuntimeException("Error serializando nodo hoja B+", e);
+        }
     }
 
     @Override
-    public byte[] deserialize(byte[] data) {
-        return new byte[0];
+    @SuppressWarnings("unchecked")
+    public void deserialize(byte[] data) {
+        try (
+                ByteArrayInputStream bais = new ByteArrayInputStream(data);
+                ObjectInputStream ois = new ObjectInputStream(bais)
+        ) {
+            int nodeType = ois.readInt();
+
+            if (nodeType != 0) {
+                throw new IllegalStateException("No es nodo hoja");
+            }
+
+            this.maxSize = ois.readInt();
+            this.pageId = ois.readLong();
+            int size = ois.readInt();
+            long nextPageId = ois.readLong();
+
+            this.nextLeaf = null;
+            this.nextLeafPageId = nextPageId;
+
+            this.nodeElements.clear();
+
+            for (int i = 0; i < size; i++) {
+                K key = (K) ois.readObject();
+                V value = (V) ois.readObject();
+                this.nodeElements.add(new NodeElement<>(key, value));
+            }
+
+        } catch (IOException | ClassNotFoundException e) {
+            throw new RuntimeException("Error deserializando nodo hoja B+", e);
+        }
     }
 }

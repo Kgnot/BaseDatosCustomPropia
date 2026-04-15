@@ -9,7 +9,9 @@ import org.arbol.logic.structures.NodeElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TreeDeleteTreeB<K extends Comparable<K>, V> implements TreeDelete<K,V> {
+import java.io.Serializable;
+
+public class TreeDeleteTreeB<K extends Comparable<K> & Serializable, V extends Serializable> implements TreeDelete<K,V> {
     private static final Logger logger = LoggerFactory.getLogger(TreeDeleteTreeB.class);
     private int invariante;
 

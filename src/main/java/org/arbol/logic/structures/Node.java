@@ -4,11 +4,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public sealed abstract class Node<K extends Comparable<K>, V> implements Serializable
+public sealed abstract class Node<K extends Comparable<K> & Serializable, V extends Serializable> implements Serializable
         permits InternalNode, BPlusLeafNode, BPlusInternalNode {
 
     // tamaño maximo
     protected int maxSize;
+    protected long pageId = -1L;
     protected List<NodeElement<K, V>> nodeElements;
 
 
@@ -24,12 +25,12 @@ public sealed abstract class Node<K extends Comparable<K>, V> implements Seriali
     }
 
     // Algunas funciones estaticas factory
-    public static <K extends Comparable<K>, V> Node<K, V>
+    public static <K extends Comparable<K> & Serializable, V extends Serializable> Node<K, V>
     createInternalNode(int maxSize) {
         return new InternalNode<>(maxSize);
     }
 
-    public static <K extends Comparable<K>, V> Node<K, V>
+    public static <K extends Comparable<K> & Serializable, V extends Serializable> Node<K, V>
     createInternalNodeWithElements(int maxSize,
                                    List<NodeElement<K, V>> elements) {
         return new InternalNode<>(maxSize, elements);
@@ -112,6 +113,14 @@ public sealed abstract class Node<K extends Comparable<K>, V> implements Seriali
         return maxSize;
     }
 
+    public long getPageId() {
+        return pageId;
+    }
+
+    public void setPageId(long pageId) {
+        this.pageId = pageId;
+    }
+
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(getClass().getSimpleName()).append("{");
@@ -134,5 +143,5 @@ public sealed abstract class Node<K extends Comparable<K>, V> implements Seriali
 
     public abstract byte[] serialize();
 
-    public abstract byte[] deserialize(byte[] data);
+    public abstract void deserialize(byte[] data);
 }

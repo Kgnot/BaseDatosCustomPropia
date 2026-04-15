@@ -10,7 +10,9 @@ import org.arbol.logic.structures.SplitResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TreeInsertionTreeB<K extends Comparable<K>, V> implements TreeInsertion<K,V> {
+import java.io.Serializable;
+
+public class TreeInsertionTreeB<K extends Comparable<K> & Serializable, V extends Serializable> implements TreeInsertion<K,V> {
 
     private final Logger logger = LoggerFactory.getLogger(TreeInsertionTreeB.class);
 

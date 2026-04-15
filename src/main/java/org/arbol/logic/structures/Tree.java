@@ -3,7 +3,9 @@ package org.arbol.logic.structures;
 import org.arbol.logic.error.NodeError;
 import org.arbol.utils.Result;
 
-public abstract class Tree<K extends Comparable<K>, V> {
+import java.io.Serializable;
+
+public abstract class Tree<K extends Comparable<K> & Serializable, V extends Serializable> {
     protected Node<K, V> root;
 
     public Tree(Node<K, V> root) {

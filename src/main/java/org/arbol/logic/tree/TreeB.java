@@ -16,10 +16,11 @@ import org.arbol.logic.structures.Tree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
-public class TreeB<K extends Comparable<K>, V> extends Tree<K, V> {
+public class TreeB<K extends Comparable<K> & Serializable, V extends Serializable> extends Tree<K, V> {
 
     private static final Logger logger = LoggerFactory.getLogger(TreeB.class);
     private final int maxSize;

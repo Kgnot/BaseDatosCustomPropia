@@ -6,7 +6,9 @@ import org.arbol.logic.structures.NodeElement;
 import org.arbol.logic.structures.SplitResult;
 import org.arbol.utils.Result;
 
-public interface TreeInsertion<K extends Comparable<K>, V> {
+import java.io.Serializable;
+
+public interface TreeInsertion<K extends Comparable<K> & Serializable, V extends Serializable> {
 
     Result<SplitResult<K, V>, NodeError.DuplicateKeyError> execute
             (Node<K, V> root, NodeElement<K, V> element, int maxSize);

@@ -10,11 +10,10 @@ import org.arbol.utils.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.Serializable;
 import java.util.List;
 
-public class TreeDeleteTreeBPlus<K extends Comparable<K>, V> implements TreeDelete<K, V> {
+public class TreeDeleteTreeBPlus<K extends Comparable<K> & Serializable, V extends Serializable> implements TreeDelete<K, V> {
 
     private static final Logger logger = LoggerFactory.getLogger(TreeDeleteTreeBPlus.class);
 

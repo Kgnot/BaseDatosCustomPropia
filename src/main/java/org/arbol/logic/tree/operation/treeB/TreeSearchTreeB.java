@@ -6,7 +6,9 @@ import org.arbol.utils.Result;
 import org.arbol.logic.structures.Node;
 import org.arbol.logic.structures.NodeElement;
 
-public class TreeSearchTreeB<K extends Comparable<K>,V> implements TreeSearch<K, V> {
+import java.io.Serializable;
+
+public class TreeSearchTreeB<K extends Comparable<K> & Serializable, V extends Serializable> implements TreeSearch<K, V> {
 
 
     public Result<NodeElement<K,V>, NodeError.NodeNotFoundError> execute(Node<K,V> root,K key) {

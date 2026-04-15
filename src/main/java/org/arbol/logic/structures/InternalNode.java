@@ -3,10 +3,11 @@ package org.arbol.logic.structures;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class InternalNode<K extends Comparable<K>, V>
+public final class InternalNode<K extends Comparable<K> & Serializable, V extends Serializable>
         extends Node<K, V> {
     // logger para debug
     private static final Logger logger =
@@ -107,6 +108,16 @@ public final class InternalNode<K extends Comparable<K>, V>
         sb.append("}");
 
         return sb.toString();
+    }
+
+    @Override
+    public byte[] serialize() {
+        return new byte[0];
+    }
+
+    @Override
+    public void deserialize(byte[] data) {
+
     }
 
 }

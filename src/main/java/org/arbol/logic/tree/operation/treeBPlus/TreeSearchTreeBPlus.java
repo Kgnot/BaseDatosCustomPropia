@@ -10,7 +10,9 @@ import org.arbol.utils.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TreeSearchTreeBPlus<K extends Comparable<K>, V> implements TreeSearch<K, V> {
+import java.io.Serializable;
+
+public class TreeSearchTreeBPlus<K extends Comparable<K> & Serializable, V extends Serializable> implements TreeSearch<K, V> {
 
     private static final Logger logger = LoggerFactory.getLogger(TreeSearchTreeBPlus.class);
 

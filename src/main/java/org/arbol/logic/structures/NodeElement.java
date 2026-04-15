@@ -1,6 +1,8 @@
 package org.arbol.logic.structures;
 
-public record NodeElement<K, V>(
+import java.io.Serializable;
+
+public record NodeElement<K extends Comparable<K> & Serializable, V extends Serializable>(
         K key,
         V value
 ) {
