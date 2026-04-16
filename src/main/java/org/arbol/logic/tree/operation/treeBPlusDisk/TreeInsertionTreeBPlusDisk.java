@@ -53,7 +53,8 @@ public class TreeInsertionTreeBPlusDisk<K extends Comparable<K> & Serializable, 
                     splitNewNode.setPageId(context.allocatePageId());
                 }
 
-                internal.addElementAt(index, childSplit.promotedElement());
+                // En B+ interno solo almacenamos la clave separadora, no el valor completo.
+                internal.addElementAt(index, new NodeElement<>(childSplit.promotedElement().key(), null));
                 internal.insertChildAt(index + 1, splitNewNode);
 
                 if (internal.isFull()) {

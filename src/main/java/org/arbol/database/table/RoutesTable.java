@@ -6,6 +6,6 @@ import org.arbol.logic.structures.table.Table;
 
 public class RoutesTable extends Table<String, Route> {
     public RoutesTable() {
-        super("routes", 4);
+        super("routes", 16);
     }
 }

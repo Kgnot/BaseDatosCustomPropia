@@ -93,7 +93,8 @@ public class TreeBPlusDisk<K extends Comparable<K> & Serializable, V extends Ser
 
             BPlusInternalNode<K, V> newRoot = new BPlusInternalNode<>(maxSize);
             newRoot.setPageId(0L);
-            newRoot.addElement(splitResult.promotedElement());
+            // En B+ interno solo almacenamos la clave separadora.
+            newRoot.addElement(new NodeElement<>(splitResult.promotedElement().key(), null));
             newRoot.addChild(oldRoot);
             newRoot.addChild(newRight);
 

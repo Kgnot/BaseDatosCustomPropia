@@ -124,7 +124,6 @@ public final class BPlusInternalNode<K extends Comparable<K> & Serializable, V e
             // serializar claves
             for (NodeElement<K, V> element : nodeElements) {
                 oos.writeObject(element.key());
-                oos.writeObject(element.value());
             }
 
             // cantidad de hijos
@@ -165,8 +164,8 @@ public final class BPlusInternalNode<K extends Comparable<K> & Serializable, V e
 
             for (int i = 0; i < size; i++) {
                 K key = (K) ois.readObject();
-                V value = (V) ois.readObject();
-                this.nodeElements.add(new NodeElement<>(key, value));
+                // En nodos internos solo necesitamos la clave separadora.
+                this.nodeElements.add(new NodeElement<>(key, null));
             }
 
             // leer hijos

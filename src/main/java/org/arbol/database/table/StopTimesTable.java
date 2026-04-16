@@ -7,6 +7,6 @@ import org.arbol.logic.structures.table.Table;
 public class StopTimesTable extends Table<StopTimesKey, StopTimes> {
 
     public StopTimesTable() {
-        super("stop_times", 8);
+        super("stop_times", 12);
     }
 }

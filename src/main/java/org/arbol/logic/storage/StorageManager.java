@@ -45,6 +45,12 @@ public class StorageManager {
     }
 
     public void writePage(long pageId, byte[] data) {
+        if (data.length > PAGE_SIZE) {
+            throw new IllegalArgumentException(
+                    "La pagina serializada excede el tamaño de pagina (" + data.length + " > " + PAGE_SIZE + ")"
+            );
+        }
+
         try (RandomAccessFile raf = new RandomAccessFile(filePath, "rw")) {
             long offset = pageId * PAGE_SIZE;
             raf.seek(offset);
