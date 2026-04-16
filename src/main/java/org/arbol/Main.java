@@ -2,7 +2,11 @@ package org.arbol;
 
 import org.arbol.database.Database;
 import org.arbol.database.loader.CsvLoader;
+import org.arbol.database.models.Route;
 import org.arbol.database.models.Stop;
+import org.arbol.database.models.StopTimes;
+import org.arbol.database.models.Trips;
+import org.arbol.database.models.key.StopTimesKey;
 import org.arbol.logic.error.NodeError;
 import org.arbol.logic.structures.table.Table;
 import org.arbol.utils.Result;
@@ -38,11 +42,14 @@ public class Main {
             System.out.println("\n===== MENU SISTEMA SITP (Bogotá) =====");
             System.out.println("1. Agregar Parada (Stops Table)");
             System.out.println("2. Buscar Parada por ID");
-            System.out.println("3. Listar todas las paradas");
-            System.out.println("4. Listar paradas paginado");
-            System.out.println("5. Cargar datos");
-            System.out.println("6. Resetear archivos de data (.dat)");
-            System.out.println("7. Salir");
+            System.out.println("3. Buscar Route por ID");
+            System.out.println("4. Buscar Trip por ID");
+            System.out.println("5. Buscar StopTime por trip_id + stop_sequence");
+            System.out.println("6. Listar todas las paradas");
+            System.out.println("7. Listar paradas paginado");
+            System.out.println("8. Cargar datos");
+            System.out.println("9. Resetear archivos de data (.dat)");
+            System.out.println("10. Salir");
             System.out.print("Opción: ");
 
             String option = sc.nextLine().trim();
@@ -50,12 +57,16 @@ public class Main {
             switch (option) {
                 case "1" -> insertarStop(db);
                 case "2" -> buscarStop(db);
-                case "3" -> listarTodasLasParadas(db);
-                case "4" -> listarParadasPaginado(db);
-                case "5" -> cargarDatos(db);
-                case "6" -> db = resetearData(db);
-                case "7" -> {
+                case "3" -> buscarRoute(db);
+                case "4" -> buscarTrip(db);
+                case "5" -> buscarStopTime(db);
+                case "6" -> listarTodasLasParadas(db);
+                case "7" -> listarParadasPaginado(db);
+                case "8" -> cargarDatos(db);
+                case "9" -> db = resetearData(db);
+                case "10" -> {
                     running = false;
+                    db.close();
                     System.out.println("Saliendo...");
                 }
                 default -> System.out.println("Opción inválida");
@@ -70,6 +81,8 @@ public class Main {
             System.out.println("Operación cancelada.");
             return currentDb;
         }
+
+        currentDb.close();
 
         String[] files = {"stops.dat", "routes.dat", "trips.dat", "stop_times.dat"};
         int removed = 0;
@@ -129,6 +142,61 @@ public class Main {
             System.out.println("Encontrado: " + s);
         } else {
             System.out.println("No encontrada.");
+        }
+    }
+
+    private static void buscarRoute(Database db) {
+        Table<String, Route> routesTable = db.getTable("routes");
+
+        System.out.print("Ingresa route_id a buscar: ");
+        String routeId = sc.nextLine();
+
+        Result<Route, NodeError.NodeNotFoundError> result = routesTable.select(routeId);
+
+        if (result.isSuccess()) {
+            Route route = result.unwrap();
+            System.out.println("Encontrado: " + route);
+        } else {
+            System.out.println("Route no encontrada.");
+        }
+    }
+
+    private static void buscarTrip(Database db) {
+        Table<String, Trips> tripsTable = db.getTable("trips");
+
+        System.out.print("Ingresa trip_id a buscar: ");
+        String tripId = sc.nextLine();
+
+        Result<Trips, NodeError.NodeNotFoundError> result = tripsTable.select(tripId);
+
+        if (result.isSuccess()) {
+            Trips trip = result.unwrap();
+            System.out.println("Encontrado: " + trip);
+        } else {
+            System.out.println("Trip no encontrado.");
+        }
+    }
+
+    private static void buscarStopTime(Database db) {
+        Table<StopTimesKey, StopTimes> stopTimesTable = db.getTable("stop_times");
+
+        System.out.print("Ingresa trip_id: ");
+        String tripId = sc.nextLine();
+        System.out.print("Ingresa stop_sequence: ");
+        String sequence = sc.nextLine();
+
+        try {
+            StopTimesKey key = StopTimesKey.from(tripId, sequence);
+            Result<StopTimes, NodeError.NodeNotFoundError> result = stopTimesTable.select(key);
+
+            if (result.isSuccess()) {
+                StopTimes stopTime = result.unwrap();
+                System.out.println("Encontrado: " + stopTime);
+            } else {
+                System.out.println("StopTime no encontrado.");
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("stop_sequence debe ser un número válido.");
         }
     }
 

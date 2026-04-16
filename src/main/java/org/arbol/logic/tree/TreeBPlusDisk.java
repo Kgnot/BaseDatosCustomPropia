@@ -221,6 +221,10 @@ public class TreeBPlusDisk<K extends Comparable<K> & Serializable, V extends Ser
 
         return result;
     }
+
+    public void close() {
+        context.close();
+    }
 }
 
 

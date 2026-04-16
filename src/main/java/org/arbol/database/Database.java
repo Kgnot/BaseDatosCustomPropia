@@ -30,4 +30,10 @@ public class Database {
     public <K extends Comparable<K> & Serializable, V extends Serializable> Table<K, V> getTable(String name) {
         return (Table<K, V>) tables.get(name);
     }
+
+    public void close() {
+        for (Table<?, ?> table : tables.values()) {
+            table.close();
+        }
+    }
 }

@@ -214,10 +214,23 @@ public final class BPlusInternalNode<K extends Comparable<K> & Serializable, V e
     }
 
     public void syncChildPageIdsFromChildren() {
-        this.childPageIds.clear();
-        for (Node<K, V> child : children) {
-            this.childPageIds.add(child != null ? child.getPageId() : -1L);
+        int targetSize = Math.max(children.size(), childPageIds.size());
+        List<Long> synced = new ArrayList<>(targetSize);
+
+        for (int i = 0; i < targetSize; i++) {
+            Node<K, V> child = i < children.size() ? children.get(i) : null;
+
+            if (child != null) {
+                synced.add(child.getPageId());
+            } else if (i < childPageIds.size()) {
+                // Si el hijo no está cargado en RAM, preservamos su puntero persistido.
+                synced.add(childPageIds.get(i));
+            } else {
+                synced.add(-1L);
+            }
         }
+
+        this.childPageIds = synced;
     }
 
     public void clearChildrenReferences() {

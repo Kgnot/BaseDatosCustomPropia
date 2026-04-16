@@ -49,4 +49,8 @@ public abstract class Table<K extends Comparable<K> & Serializable, V extends Se
         return name;
     }
 
+    public void close() {
+        tree.close();
+    }
+
 }

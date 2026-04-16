@@ -130,5 +130,9 @@ public class DiskOperationContext<K extends Comparable<K> & Serializable, V exte
 
         return deserializeNode(data);
     }
+
+    public void close() {
+        storageManager.close();
+    }
 }
 

@@ -149,12 +149,12 @@ public class CsvLoader {
                         continue;
                     }
 
-                    String routeId = p.get(0).trim();
-                    String serviceId = p.get(1).trim();
+                    String routeId = p.get(0).trim().intern();
+                    String serviceId = p.get(1).trim().intern();
                     String tripId = p.get(2).trim();
-                    String shapeId = p.get(3).trim();
+                    String shapeId = p.get(3).trim().intern();
 
-                    Trips trip = new Trips(routeId, serviceId, tripId, shapeId);
+                    Trips trip = new Trips(routeId, serviceId, shapeId);
                     try {
                         Result<Void, NodeError.DuplicateKeyError> result = table.insert(tripId, trip);
                         if (result.isSuccess()) {
@@ -211,21 +211,19 @@ public class CsvLoader {
                         continue;
                     }
 
-                    String tripId = p.get(0).trim();
+                    String tripId = p.get(0).trim().intern();
                     String arrivalStr = p.get(1).trim();
                     String departureStr = p.get(2).trim();
-                    String stopId = p.get(3).trim();
+                    String stopId = p.get(3).trim().intern();
                     String seqStr = p.get(4).trim();
                     String pointStr = p.size() > 5 ? p.get(5).trim() : "0";
 
                     StopTimesKey key = StopTimesKey.from(tripId, seqStr);
 
                     StopTimes st = new StopTimes(
-                            tripId,
                             arrivalStr,
                             parseTime(departureStr),
                             stopId,
-                            Integer.parseInt(seqStr),
                             Integer.parseInt(pointStr)
                     );
 
