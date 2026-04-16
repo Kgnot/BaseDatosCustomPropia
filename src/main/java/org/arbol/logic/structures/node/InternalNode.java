@@ -1,4 +1,4 @@
-package org.arbol.logic.structures;
+package org.arbol.logic.structures.node;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,4 +1,4 @@
-package org.arbol.logic.structures;
+package org.arbol.logic.structures.node;
 
 import java.io.Serializable;
 import java.util.ArrayList;

@@ -1,9 +1,9 @@
 package org.arbol.logic.tree.operation.treeBPlusDisk;
 
 import org.arbol.logic.storage.StorageManager;
-import org.arbol.logic.structures.BPlusInternalNode;
-import org.arbol.logic.structures.BPlusLeafNode;
-import org.arbol.logic.structures.Node;
+import org.arbol.logic.structures.node.BPlusInternalNode;
+import org.arbol.logic.structures.node.BPlusLeafNode;
+import org.arbol.logic.structures.node.Node;
 
 import java.io.ByteArrayInputStream;
 import java.io.ObjectInputStream;

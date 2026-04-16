@@ -1,8 +1,8 @@
 package org.arbol.logic.tree;
 
 import org.arbol.logic.error.NodeError;
-import org.arbol.logic.structures.*;
 import org.arbol.logic.structures.Tree;
+import org.arbol.logic.structures.node.*;
 import org.arbol.logic.tree.operation.interace.TreeDelete;
 import org.arbol.logic.tree.operation.interace.TreeInsertion;
 import org.arbol.logic.tree.operation.interace.TreeSearch;

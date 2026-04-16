@@ -1,7 +1,7 @@
 package org.arbol.logic.tree.operation.treeBPlus;
 
 import org.arbol.logic.error.NodeError;
-import org.arbol.logic.structures.*;
+import org.arbol.logic.structures.node.*;
 import org.arbol.logic.tree.operation.interace.TreeInsertion;
 import org.arbol.utils.Result;
 import org.slf4j.Logger;

@@ -8,11 +8,11 @@ import org.arbol.logic.tree.operation.treeBPlusDisk.DiskOperationContext;
 import org.arbol.logic.tree.operation.treeBPlusDisk.TreeDeleteTreeBPlusDisk;
 import org.arbol.logic.tree.operation.treeBPlusDisk.TreeInsertionTreeBPlusDisk;
 import org.arbol.logic.tree.operation.treeBPlusDisk.TreeSearchTreeBPlusDisk;
-import org.arbol.logic.structures.BPlusInternalNode;
-import org.arbol.logic.structures.BPlusLeafNode;
-import org.arbol.logic.structures.Node;
-import org.arbol.logic.structures.NodeElement;
-import org.arbol.logic.structures.SplitResult;
+import org.arbol.logic.structures.node.BPlusInternalNode;
+import org.arbol.logic.structures.node.BPlusLeafNode;
+import org.arbol.logic.structures.node.Node;
+import org.arbol.logic.structures.node.NodeElement;
+import org.arbol.logic.structures.node.SplitResult;
 import org.arbol.logic.structures.Tree;
 import org.arbol.utils.Result;
 

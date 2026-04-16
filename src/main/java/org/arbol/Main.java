@@ -1,9 +1,9 @@
 package org.arbol;
 
+import org.arbol.database.Database;
+import org.arbol.database.models.Stop;
 import org.arbol.logic.error.NodeError;
-import org.arbol.logic.structures.NodeElement;
-import org.arbol.logic.structures.Tree;
-import org.arbol.logic.tree.TreeBPlusDisk;
+import org.arbol.logic.structures.table.Table;
 import org.arbol.utils.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,114 +23,74 @@ public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) {
-        logger.info("Inicio de la aplicación Árbol B+");
+        logger.info("Inicio de la Base de Datos B+ (Simulando SITP)");
 
-        Tree<Integer, String> tree = new TreeBPlusDisk<>("bplus-main", 4);
+        // 1. Cargar el esquema de la base de datos
+        // Esto automáticamente buscará/creará data/stops.dat y data/routes.dat
+        Database db = new Database();
 
         boolean running = true;
         while (running) {
-            System.out.println("\n===== ÁRBOL B+ (MENU PRUEBAS) =====");
-            System.out.println("1. Agregar elemento (Insert)");
-            System.out.println("2. Eliminar elemento (Delete)");
-            System.out.println("3. Buscar elemento (Search)");
-            System.out.println("4. Ver estructura completa (Tree View)");
-            System.out.println("5. Ver hojas secuencialmente (Leaf Scan) <- Único de B+");
-            System.out.println("6. Salir");
-            System.out.print("Selecciona una opción: ");
+            System.out.println("\n===== MENU SISTEMA SITP (Bogotá) =====");
+            System.out.println("1. Agregar Parada (Stops Table)");
+            System.out.println("2. Buscar Parada por ID");
+            System.out.println("3. Listar todas las paradas (Range Scan - Avanzado)");
+            System.out.println("4. Salir");
+            System.out.print("Opción: ");
 
             String option = sc.nextLine().trim();
 
             switch (option) {
-                case "1" -> agregarElemento(tree);
-                case "2" -> eliminarElemento(tree);
-                case "3" -> buscarElemento(tree);
-                case "4" -> verArbol(tree);
-                case "5" -> verHojasSecuenciales();
-                case "6" -> {
+                case "1" -> insertarStop(db);
+                case "2" -> buscarStop(db);
+                case "3" -> System.out.println("Función de range scan pendiente de implementar ;)");
+                case "4" -> {
                     running = false;
-                    logger.info("Árbol B+ final:\n{}", tree);
-                    System.out.println("Saliendo...");
+                    System.out.println("Guardando y cerrando base de datos...");
                 }
-                default -> System.out.println("Opción inválida. Intenta de nuevo.");
+                default -> System.out.println("Opción inválida");
             }
         }
     }
 
-    private static void agregarElemento(Tree<Integer, String> tree) {
-        System.out.print("Ingresa la clave a agregar: ");
-        try {
-            int key = Integer.parseInt(sc.nextLine().trim());
-            // Creamos el elemento. El valor es dummy "v: key" para probar
-            var result = tree.insert(new NodeElement<>(key, "Valor para " + key));
+    private static void insertarStop(Database db) {
+        // Obtenemos la tabla stops
+        Table<String, Stop> stopsTable = db.getTable("stops");
 
-            if (result.isSuccess()) {
-                System.out.println("✓ Elemento agregado exitosamente");
-                logger.info("Elemento {} insertado en el árbol B+", key);
-            } else {
-                if (result instanceof Result.Failure<?, ?> failure) {
-                    System.out.println("✗ Error: " + ((NodeError) failure.error()).getMessage());
-                }
-            }
-            // Opcional: Mostrar árbol automático después de insertar
-            // verArbol(tree);
-        } catch (NumberFormatException e) {
-            System.out.println("✗ Error: Debes ingresar un número válido");
-            logger.error("Error en entrada: {}", e.getMessage());
+        System.out.print("ID Parada (ej. ST001): ");
+        String id = sc.nextLine();
+        System.out.print("Nombre Parada (ej. Portal Norte): ");
+        String name = sc.nextLine();
+        System.out.print("Latitud: ");
+        double lat = Double.parseDouble(sc.nextLine());
+        System.out.print("Longitud: ");
+        double lon = Double.parseDouble(sc.nextLine());
+
+        Stop stop = new Stop(id, "CODE_" + id, name, lat, lon);
+
+        // Insertar en el B+ Tree de disco
+        Result<Void, NodeError.DuplicateKeyError> result = stopsTable.insert(id, stop);
+
+        if (result.isSuccess()) {
+            System.out.println("✓ Parada guardada en disco en 'stops.dat'");
+        } else {
+            System.out.println("✗ Error: ID duplicado");
         }
     }
 
-    private static void eliminarElemento(Tree<Integer, String> tree) {
-        System.out.print("Ingresa la clave a eliminar: ");
-        try {
-            int key = Integer.parseInt(sc.nextLine().trim());
-            var result = tree.delete(key);
+    private static void buscarStop(Database db) {
+        Table<String, Stop> stopsTable = db.getTable("stops");
 
-            if (result.isSuccess()) {
-                System.out.println("✓ Elemento eliminado exitosamente");
-                logger.info("Elemento {} eliminado del árbol B+", key);
-            } else {
-                if (result instanceof Result.Failure<?, ?> failure) {
-                    System.out.println("✗ Error: " + ((NodeError) failure.error()).getMessage());
-                }
-            }
-        } catch (NumberFormatException e) {
-            System.out.println("✗ Error: Debes ingresar un número válido");
-            logger.error("Error en entrada: {}", e.getMessage());
+        System.out.print("Ingresa ID a buscar: ");
+        String id = sc.nextLine();
+
+        Result<Stop, NodeError.NodeNotFoundError> result = stopsTable.select(id);
+
+        if (result.isSuccess()) {
+            Stop s = result.unwrap();
+            System.out.println("Encontrado: " + s);
+        } else {
+            System.out.println("No encontrada.");
         }
-    }
-
-    private static void buscarElemento(Tree<Integer, String> tree) {
-        System.out.print("Ingresa la clave a buscar: ");
-        try {
-            int key = Integer.parseInt(sc.nextLine().trim());
-            var result = tree.search(key);
-
-            if (result.isSuccess()) {
-                var element = result.unwrap();
-                System.out.println("✓ Elemento encontrado: Clave=" + element.key() + ", Valor=" + element.value());
-                logger.info("Elemento {} encontrado en el árbol B+", key);
-            } else {
-                if (result instanceof Result.Failure<?, ?> failure) {
-                    System.out.println("✗ Error: " + ((NodeError) failure.error()).getMessage());
-                }
-            }
-        } catch (NumberFormatException e) {
-            System.out.println("✗ Error: Debes ingresar un número válido");
-            logger.error("Error en entrada: {}", e.getMessage());
-        }
-    }
-
-    private static void verArbol(Tree<Integer, String> tree) {
-        System.out.println("\n--- Estructura Jerárquica (Niveles) ---");
-        System.out.println(tree);
-    }
-
-    /**
-     * Método específico para probar la lista enlazada de hojas del B+ Tree.
-     * Demuestra la capacidad de recorrido secuencial optimizado.
-     */
-    private static void verHojasSecuenciales() {
-        System.out.println("\n--- Recorrido Secuencial de Hojas (B+ Feature) ---");
-        System.out.println("En modo disco esta vista no está implementada aún.");
     }
 }

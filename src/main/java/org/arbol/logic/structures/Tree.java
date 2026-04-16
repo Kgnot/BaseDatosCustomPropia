@@ -1,6 +1,8 @@
 package org.arbol.logic.structures;
 
 import org.arbol.logic.error.NodeError;
+import org.arbol.logic.structures.node.Node;
+import org.arbol.logic.structures.node.NodeElement;
 import org.arbol.utils.Result;
 
 import java.io.Serializable;

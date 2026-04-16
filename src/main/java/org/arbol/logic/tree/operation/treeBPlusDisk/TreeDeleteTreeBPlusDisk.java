@@ -1,7 +1,7 @@
 package org.arbol.logic.tree.operation.treeBPlusDisk;
 
 import org.arbol.logic.error.NodeError;
-import org.arbol.logic.structures.Node;
+import org.arbol.logic.structures.node.Node;
 import org.arbol.logic.tree.operation.interace.TreeDelete;
 import org.arbol.utils.Result;
 

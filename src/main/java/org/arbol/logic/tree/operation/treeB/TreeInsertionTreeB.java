@@ -3,10 +3,10 @@ package org.arbol.logic.tree.operation.treeB;
 import org.arbol.logic.error.NodeError;
 import org.arbol.logic.tree.operation.interace.TreeInsertion;
 import org.arbol.utils.Result;
-import org.arbol.logic.structures.InternalNode;
-import org.arbol.logic.structures.Node;
-import org.arbol.logic.structures.NodeElement;
-import org.arbol.logic.structures.SplitResult;
+import org.arbol.logic.structures.node.InternalNode;
+import org.arbol.logic.structures.node.Node;
+import org.arbol.logic.structures.node.NodeElement;
+import org.arbol.logic.structures.node.SplitResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

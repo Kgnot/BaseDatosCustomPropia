@@ -1,17 +1,16 @@
 package org.arbol.logic.tree.operation.treeBPlus;
 
 import org.arbol.logic.error.NodeError;
-import org.arbol.logic.structures.BPlusInternalNode;
-import org.arbol.logic.structures.BPlusLeafNode;
-import org.arbol.logic.structures.Node;
-import org.arbol.logic.structures.NodeElement;
+import org.arbol.logic.structures.node.BPlusInternalNode;
+import org.arbol.logic.structures.node.BPlusLeafNode;
+import org.arbol.logic.structures.node.Node;
+import org.arbol.logic.structures.node.NodeElement;
 import org.arbol.logic.tree.operation.interace.TreeDelete;
 import org.arbol.utils.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
-import java.util.List;
 
 public class TreeDeleteTreeBPlus<K extends Comparable<K> & Serializable, V extends Serializable> implements TreeDelete<K, V> {
 
