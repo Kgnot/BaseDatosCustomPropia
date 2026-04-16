@@ -71,15 +71,15 @@ public final class BPlusInternalNode<K extends Comparable<K> & Serializable, V e
 
         // Izquierda: elementos desde 0 hasta indexMedio (excluyente en B+)
         var subListIzq = new ArrayList<>(nodeElements.subList(0, indexMedio));
-        // Derecha: elementos desde indexMedio (incluyente) hasta el final
-        var subListDer = new ArrayList<>(nodeElements.subList(indexMedio, nodeElements.size()));
+        // Derecha: elementos después del promovido
+        var subListDer = new ArrayList<>(nodeElements.subList(indexMedio + 1, nodeElements.size()));
 
         BPlusInternalNode<K, V> nodoIzq = new BPlusInternalNode<>(maxSize, subListIzq);
         BPlusInternalNode<K, V> nodoDer = new BPlusInternalNode<>(maxSize, subListDer);
 
         // Dividir hijos
         // Si tenemos M elementos, tenemos M+1 hijos.
-        // El hijo en posición indexMedio sube con la clave? No, en B+ el hijo medio va a la derecha.
+        // El hijo en posición indexMedio+1 es el primer hijo de la derecha.
         int childSplitIndex = indexMedio + 1;
 
         nodoIzq.children = new ArrayList<>(children.subList(0, childSplitIndex));

@@ -18,6 +18,9 @@ import org.arbol.utils.Result;
 
 import java.io.Serializable;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Queue;
 
 public class TreeBPlusDisk<K extends Comparable<K> & Serializable, V extends Serializable> extends Tree<K, V> {
@@ -153,6 +156,69 @@ public class TreeBPlusDisk<K extends Comparable<K> & Serializable, V extends Ser
         }
 
         return sb.toString();
+    }
+
+    public List<NodeElement<K, V>> findAll() {
+        return findAll(0, Integer.MAX_VALUE);
+    }
+
+    public List<NodeElement<K, V>> findAll(int offset, int limit) {
+        if (offset < 0) {
+            throw new IllegalArgumentException("offset no puede ser negativo");
+        }
+        if (limit < 0) {
+            throw new IllegalArgumentException("limit no puede ser negativo");
+        }
+        if (root == null || limit == 0) {
+            return Collections.emptyList();
+        }
+
+        Node<K, V> current = root;
+        while (current instanceof BPlusInternalNode<K, V> internal) {
+            current = context.getChild(internal, 0);
+            if (current == null) {
+                return Collections.emptyList();
+            }
+        }
+
+        if (!(current instanceof BPlusLeafNode<?, ?>)) {
+            return Collections.emptyList();
+        }
+        BPlusLeafNode<K, V> leaf = (BPlusLeafNode<K, V>) current;
+
+        List<NodeElement<K, V>> result = new ArrayList<>();
+        int skipped = 0;
+
+        while (true) {
+            for (NodeElement<K, V> element : leaf.getNodeElements()) {
+                if (skipped < offset) {
+                    skipped++;
+                    continue;
+                }
+
+                result.add(element);
+                if (result.size() >= limit) {
+                    break;
+                }
+            }
+
+            if (result.size() >= limit) {
+                break;
+            }
+
+            long nextLeafPageId = leaf.getNextLeafPageId();
+            if (nextLeafPageId < 0) {
+                break;
+            }
+
+            Node<K, V> nextNode = context.getNodeByPageId(nextLeafPageId);
+            if (!(nextNode instanceof BPlusLeafNode<?, ?>)) {
+                break;
+            }
+            leaf = (BPlusLeafNode<K, V>) nextNode;
+        }
+
+        return result;
     }
 }
 

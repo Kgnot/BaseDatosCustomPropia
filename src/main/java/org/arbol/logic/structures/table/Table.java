@@ -6,6 +6,7 @@ import org.arbol.logic.tree.TreeBPlusDisk;
 import org.arbol.utils.Result;
 
 import java.io.Serializable;
+import java.util.List;
 
 public abstract class Table<K extends Comparable<K> & Serializable, V extends Serializable> {
 
@@ -26,6 +27,22 @@ public abstract class Table<K extends Comparable<K> & Serializable, V extends Se
         return res.isSuccess()
                 ? new Result.Success<>(res.unwrap().value())
                 : new Result.Failure<>(new NodeError.NodeNotFoundError(key));
+    }
+
+    public Result<Void, NodeError.NodeNotFoundError> delete(K key) {
+        return tree.delete(key);
+    }
+
+    public List<V> findAll() {
+        return tree.findAll().stream()
+                .map(NodeElement::value)
+                .toList();
+    }
+
+    public List<V> findAll(int offset, int limit) {
+        return tree.findAll(offset, limit).stream()
+                .map(NodeElement::value)
+                .toList();
     }
 
     public String getName() {
