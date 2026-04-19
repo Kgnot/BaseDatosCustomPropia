@@ -1,6 +1,6 @@
 package org.arbol.logic.structures.node;
 
-import java.io.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,67 +73,13 @@ public final class BPlusLeafNode<K extends Comparable<K> & Serializable, V exten
         return nextLeafPageId;
     }
 
+    public void setNextLeafPageId(long nextLeafPageId) {
+        this.nextLeafPageId = nextLeafPageId;
+    }
+
     @Override
     public String toString() {
         return "LeafNode" + super.toString() + (nextLeaf != null ? " -> Next" : " -> END");
     }
 
-    @Override
-    public byte[] serialize() {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
-
-            oos.writeInt(0); // tipo nodo
-            oos.writeInt(maxSize);
-            oos.writeLong(pageId);
-            oos.writeInt(nodeElements.size());
-            oos.writeLong(nextLeaf != null ? nextLeaf.getPageId() : nextLeafPageId);
-
-            for (NodeElement<K, V> element : nodeElements) {
-                oos.writeObject(element.key());
-                oos.writeObject(element.value());
-            }
-
-            oos.flush();
-            return baos.toByteArray();
-
-        } catch (IOException e) {
-            throw new RuntimeException("Error serializando nodo hoja B+", e);
-        }
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public void deserialize(byte[] data) {
-        try (
-                ByteArrayInputStream bais = new ByteArrayInputStream(data);
-                ObjectInputStream ois = new ObjectInputStream(bais)
-        ) {
-            int nodeType = ois.readInt();
-
-            if (nodeType != 0) {
-                throw new IllegalStateException("No es nodo hoja");
-            }
-
-            this.maxSize = ois.readInt();
-            this.pageId = ois.readLong();
-            int size = ois.readInt();
-            long nextPageId = ois.readLong();
-
-            this.nextLeaf = null;
-            this.nextLeafPageId = nextPageId;
-
-            this.nodeElements.clear();
-
-            for (int i = 0; i < size; i++) {
-                K key = (K) ois.readObject();
-                V value = (V) ois.readObject();
-                this.nodeElements.add(new NodeElement<>(key, value));
-            }
-
-        } catch (IOException | ClassNotFoundException e) {
-            throw new RuntimeException("Error deserializando nodo hoja B+", e);
-        }
-    }
 }

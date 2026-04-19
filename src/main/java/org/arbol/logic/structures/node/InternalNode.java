@@ -44,9 +44,6 @@ public final class InternalNode<K extends Comparable<K> & Serializable, V extend
         logger.debug("Tamaño de los hijos: {} ", children.size());
         return this.children.get(index);
     }
-    public Node<K, V> removeChild(int index) {
-        return this.children.remove(index);
-    }
     public List<Node<K, V>> getChildren() {
         return this.children;
     }
@@ -110,14 +107,5 @@ public final class InternalNode<K extends Comparable<K> & Serializable, V extend
         return sb.toString();
     }
 
-    @Override
-    public byte[] serialize() {
-        return new byte[0];
-    }
-
-    @Override
-    public void deserialize(byte[] data) {
-
-    }
 
 }

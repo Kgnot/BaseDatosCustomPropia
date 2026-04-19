@@ -1,6 +1,6 @@
 package org.arbol.logic.structures.node;
 
-import java.io.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -107,81 +107,6 @@ public final class BPlusInternalNode<K extends Comparable<K> & Serializable, V e
         return sb.toString();
     }
 
-    @Override
-    public byte[] serialize() {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
-
-            // 1 = nodo interno
-            oos.writeInt(1);
-            oos.writeInt(maxSize);
-            oos.writeLong(pageId);
-
-            // cantidad de claves
-            oos.writeInt(nodeElements.size());
-
-            // serializar claves
-            for (NodeElement<K, V> element : nodeElements) {
-                oos.writeObject(element.key());
-            }
-
-            // cantidad de hijos
-            oos.writeInt(childPageIds.size());
-
-            // serializamos ids de hijos para cargarlos bajo demanda
-            for (Long childPageId : childPageIds) {
-                oos.writeLong(childPageId != null ? childPageId : -1L);
-            }
-
-            oos.flush();
-            return baos.toByteArray();
-
-        } catch (IOException e) {
-            throw new RuntimeException("Error serializando nodo interno B+", e);
-        }
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public void deserialize(byte[] data) {
-        try (
-                ByteArrayInputStream bais = new ByteArrayInputStream(data);
-                ObjectInputStream ois = new ObjectInputStream(bais)
-        ) {
-            int nodeType = ois.readInt();
-
-            if (nodeType != 1) {
-                throw new IllegalStateException("El bloque no corresponde a un nodo interno");
-            }
-
-            this.maxSize = ois.readInt();
-            this.pageId = ois.readLong();
-
-            // leer claves
-            int size = ois.readInt();
-            this.nodeElements.clear();
-
-            for (int i = 0; i < size; i++) {
-                K key = (K) ois.readObject();
-                // En nodos internos solo necesitamos la clave separadora.
-                this.nodeElements.add(new NodeElement<>(key, null));
-            }
-
-            // leer hijos
-            int childCount = ois.readInt();
-            this.children.clear();
-            this.childPageIds.clear();
-
-            for (int i = 0; i < childCount; i++) {
-                this.childPageIds.add(ois.readLong());
-                this.children.add(null);
-            }
-
-        } catch (IOException | ClassNotFoundException e) {
-            throw new RuntimeException("Error deserializando nodo interno B+", e);
-        }
-    }
 
     public List<Long> getChildPageIds() {
         return childPageIds;
@@ -194,13 +119,6 @@ public final class BPlusInternalNode<K extends Comparable<K> & Serializable, V e
         this.childPageIds.set(index, childPageId);
     }
 
-    public void addChildPageId(long childPageId) {
-        this.childPageIds.add(childPageId);
-    }
-
-    public void insertChildPageIdAt(int index, long childPageId) {
-        this.childPageIds.add(index, childPageId);
-    }
 
     public long getChildPageIdAt(int index) {
         if (index < 0 || index >= childPageIds.size()) {

@@ -1,28 +1,48 @@
 package org.arbol.logic.tree.operation.treeBPlusDisk;
 
-import org.arbol.logic.storage.StorageManager;
+import org.arbol.logic.tree.operation.treeBPlusDisk.allocator.PageAllocator;
+import org.arbol.logic.tree.operation.treeBPlusDisk.allocator.SequentialPageAllocator;
+import org.arbol.logic.tree.operation.treeBPlusDisk.cache.LruNodeCache;
+import org.arbol.logic.tree.operation.treeBPlusDisk.cache.NodeCache;
+import org.arbol.logic.tree.operation.treeBPlusDisk.repository.PageStore;
+import org.arbol.logic.tree.operation.treeBPlusDisk.repository.StoragePageStore;
+import org.arbol.logic.tree.operation.treeBPlusDisk.serializer.DefaultNodeSerializer;
+import org.arbol.logic.tree.operation.treeBPlusDisk.serializer.NodeSerializer;
 import org.arbol.logic.structures.node.BPlusInternalNode;
-import org.arbol.logic.structures.node.BPlusLeafNode;
 import org.arbol.logic.structures.node.Node;
 
-import java.io.ByteArrayInputStream;
-import java.io.ObjectInputStream;
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
 public class DiskOperationContext<K extends Comparable<K> & Serializable, V extends Serializable> {
 
-    private final StorageManager storageManager;
     private final int maxSize;
-    private final Map<Long, Node<K, V>> buffer;
-    private long nextFreePageId;
+    private final PageStore pageStore;
+    private final NodeSerializer<K, V> nodeSerializer;
+    private final NodeCache<K, V> nodeCache;
+    private final PageAllocator pageAllocator;
 
     public DiskOperationContext(String dataFileName, int maxSize) {
-        this.storageManager = new StorageManager(dataFileName);
+        this(
+                new StoragePageStore(dataFileName),
+                new DefaultNodeSerializer<>(),
+                new LruNodeCache<>(512),
+                new SequentialPageAllocator(),
+                maxSize
+        );
+    }
+
+    public DiskOperationContext(
+            PageStore pageStore,
+            NodeSerializer<K, V> nodeSerializer,
+            NodeCache<K, V> nodeCache,
+            PageAllocator pageAllocator,
+            int maxSize
+    ) {
+        this.pageStore = pageStore;
+        this.nodeSerializer = nodeSerializer;
+        this.nodeCache = nodeCache;
+        this.pageAllocator = pageAllocator;
         this.maxSize = maxSize;
-        this.buffer = new HashMap<>();
-        this.nextFreePageId = 1L;
     }
 
     public int getMaxSize() {
@@ -30,41 +50,27 @@ public class DiskOperationContext<K extends Comparable<K> & Serializable, V exte
     }
 
     public void initializeForNewTree() {
-        this.nextFreePageId = 1L;
+        this.pageAllocator.initialize(1L);
     }
 
     public void initializeFromStorage() {
-        this.nextFreePageId = Math.max(1L, storageManager.getTotalPages());
+        this.pageAllocator.initialize(pageStore.totalPages());
     }
 
     public byte[] readPage(long pageId) {
-        return storageManager.readPage(pageId);
+        return pageStore.read(pageId);
     }
 
     public long allocatePageId() {
-        return nextFreePageId++;
+        return pageAllocator.allocate();
     }
 
     public Node<K, V> deserializeNode(byte[] data) {
-        try (ByteArrayInputStream bis = new ByteArrayInputStream(data);
-             ObjectInputStream ois = new ObjectInputStream(bis)) {
-            int type = ois.readInt();
-            Node<K, V> node;
-            if (type == 0) {
-                node = new BPlusLeafNode<>(maxSize);
-            } else if (type == 1) {
-                node = new BPlusInternalNode<>(maxSize);
-            } else {
-                throw new IllegalStateException("Tipo de nodo desconocido: " + type);
-            }
-            node.deserialize(data);
-            if (node.getPageId() >= 0) {
-                buffer.put(node.getPageId(), node);
-            }
-            return node;
-        } catch (Exception e) {
-            throw new RuntimeException("No se pudo deserializar nodo desde pagina", e);
+        Node<K, V> node = nodeSerializer.deserialize(data, maxSize);
+        if (node.getPageId() >= 0) {
+            nodeCache.put(node.getPageId(), node);
         }
+        return node;
     }
 
     public void saveNode(Node<K, V> node) {
@@ -76,8 +82,8 @@ public class DiskOperationContext<K extends Comparable<K> & Serializable, V exte
             internal.syncChildPageIdsFromChildren();
         }
 
-        storageManager.writePage(node.getPageId(), node.serialize());
-        buffer.put(node.getPageId(), node);
+        pageStore.write(node.getPageId(), nodeSerializer.serialize(node));
+        nodeCache.put(node.getPageId(), node);
     }
 
     public Node<K, V> getChild(BPlusInternalNode<K, V> parent, int index) {
@@ -97,13 +103,13 @@ public class DiskOperationContext<K extends Comparable<K> & Serializable, V exte
             return null;
         }
 
-        Node<K, V> buffered = buffer.get(childPageId);
-        if (buffered != null) {
-            parent.setChild(index, buffered);
-            return buffered;
+        var buffered = nodeCache.get(childPageId);
+        if (buffered.isPresent()) {
+            parent.setChild(index, buffered.get());
+            return buffered.get();
         }
 
-        byte[] data = storageManager.readPage(childPageId);
+        byte[] data = pageStore.read(childPageId);
         if (data == null) {
             return null;
         }
@@ -118,12 +124,12 @@ public class DiskOperationContext<K extends Comparable<K> & Serializable, V exte
             return null;
         }
 
-        Node<K, V> buffered = buffer.get(pageId);
-        if (buffered != null) {
-            return buffered;
+        var buffered = nodeCache.get(pageId);
+        if (buffered.isPresent()) {
+            return buffered.get();
         }
 
-        byte[] data = storageManager.readPage(pageId);
+        byte[] data = pageStore.read(pageId);
         if (data == null) {
             return null;
         }
@@ -132,7 +138,7 @@ public class DiskOperationContext<K extends Comparable<K> & Serializable, V exte
     }
 
     public void close() {
-        storageManager.close();
+        pageStore.close();
     }
 }
 

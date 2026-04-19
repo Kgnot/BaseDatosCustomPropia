@@ -139,9 +139,4 @@ public sealed abstract class Node<K extends Comparable<K> & Serializable, V exte
         return sb.toString();
     }
 
-    // para serializar:
-
-    public abstract byte[] serialize();
-
-    public abstract void deserialize(byte[] data);
 }

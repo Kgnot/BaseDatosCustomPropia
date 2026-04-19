@@ -4,6 +4,7 @@ import org.arbol.bussines.StopQuery;
 import org.arbol.bussines.TripStopEdge;
 import org.arbol.bussines.StopTransition;
 import org.arbol.database.Database;
+import org.arbol.database.loader.CsvLoader;
 import org.arbol.database.models.Stop;
 import org.arbol.logic.structures.table.Table;
 import org.slf4j.Logger;
@@ -26,6 +27,7 @@ public class Main {
         logger.info("Inicio de la Base de Datos B+ (Simulando SITP)");
         // cargo toda mi base de datos
         Database db = new Database();
+        //cargarDatos(db);
         logger.info("Parada portal Usme");
         Table<String, Stop> stopsTable = db.getTable("stops");
         List<Stop> found = stopsTable.findByField("stopName", "AV. Caracas - CL 65 Sur Portal Usme");
@@ -50,5 +52,22 @@ public class Main {
         logger.info("Pares agregados encontrados: {}", grouped.size());
         System.out.println("Primeras 10 transiciones agrupadas: " + grouped.subList(0, Math.min(10, grouped.size())));
 
+    }
+
+    private static void cargarDatos(Database db) {
+        CsvLoader loader = new CsvLoader(db);
+        System.out.println("Iniciando carga de datos GTFS...");
+
+        // Asegúrate de que los archivos existan en esta ruta relativa
+        String basePath = "gtfs_data/";
+
+        // Cargamos primero las tablas pequeñas para probar
+        loader.loadRoutes(basePath + "routes.txt");
+        loader.loadStops(basePath + "stops.txt");
+        loader.loadTrips(basePath + "trips.txt");
+        loader.loadStopTimes(basePath + "stop_times.txt");
+
+
+        System.out.println("Carga finalizada.");
     }
 }
