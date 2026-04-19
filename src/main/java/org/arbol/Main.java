@@ -27,7 +27,8 @@ public class Main {
         logger.info("Inicio de la Base de Datos B+ (Simulando SITP)");
         // cargo toda mi base de datos
         Database db = new Database();
-        //cargarDatos(db);
+        // cargamos los datos
+//        cargarDatos(db);
         logger.info("Parada portal Usme");
         Table<String, Stop> stopsTable = db.getTable("stops");
         List<Stop> found = stopsTable.findByField("stopName", "AV. Caracas - CL 65 Sur Portal Usme");

@@ -17,9 +17,9 @@ public class StorageManager {
     private static final int HEADER_SIZE = 13; // magic(4) + flag(1) + originalLen(4) + payloadLen(4)
     private static final byte FLAG_RAW = 0;
     private static final byte FLAG_COMPRESSED = 1;
-    // Por defecto desactivado para priorizar throughput de ingestión.
+    // Por defecto activado para reducir tamaño en disco (binary+compress).
     private static final boolean COMPRESSION_ENABLED =
-            Boolean.parseBoolean(System.getProperty("arbol.storage.compress", "false"));
+            Boolean.parseBoolean(System.getProperty("arbol.storage.compress", "true"));
     private final String filePath;
     private final RandomAccessFile raf;
     private boolean closed;
