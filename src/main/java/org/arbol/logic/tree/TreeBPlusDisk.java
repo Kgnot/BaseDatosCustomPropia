@@ -270,6 +270,44 @@ public class TreeBPlusDisk<K extends Comparable<K> & Serializable, V extends Ser
             }
         }
     }
+
+    public void scanElements(Consumer<NodeElement<K, V>> action) {
+        if (root == null) {
+            return;
+        }
+
+        Set<Long> visitedPages = new HashSet<>();
+        scanElementsInOrder(root, visitedPages, action);
+    }
+
+    private void scanElementsInOrder(
+            Node<K, V> node,
+            Set<Long> visitedPages,
+            Consumer<NodeElement<K, V>> action
+    ) {
+        if (node == null) {
+            return;
+        }
+
+        long pageId = node.getPageId();
+        if (pageId >= 0 && !visitedPages.add(pageId)) {
+            return;
+        }
+
+        if (node instanceof BPlusLeafNode<K, V> leaf) {
+            for (NodeElement<K, V> element : leaf.getNodeElements()) {
+                action.accept(element);
+            }
+            return;
+        }
+
+        if (node instanceof BPlusInternalNode<K, V> internal) {
+            for (int i = 0; i < internal.getChildPageIds().size(); i++) {
+                Node<K, V> child = context.getChild(internal, i);
+                scanElementsInOrder(child, visitedPages, action);
+            }
+        }
+    }
 }
 
 

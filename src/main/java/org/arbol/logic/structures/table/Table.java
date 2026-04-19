@@ -79,6 +79,10 @@ public abstract class Table<K extends Comparable<K> & Serializable, V extends Se
         tree.scan(action);
     }
 
+    public void scanEntries(Consumer<NodeElement<K, V>> action) {
+        tree.scanElements(action);
+    }
+
     // Busqueda dinamica por nombre del atributo: Si no es PK, será lenta
     // TODO, mirar como hacer Indexación aquí.
     public List<V> findByField(String fieldName, Object value) {

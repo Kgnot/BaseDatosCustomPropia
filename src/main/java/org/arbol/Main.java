@@ -1,6 +1,8 @@
 package org.arbol;
 
 import org.arbol.bussines.StopQuery;
+import org.arbol.bussines.TripStopEdge;
+import org.arbol.bussines.StopTransition;
 import org.arbol.database.Database;
 import org.arbol.database.models.Stop;
 import org.arbol.logic.structures.table.Table;
@@ -8,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.Scanner;
 
 /**
  * <h2>Pruebas Árbol B+</h2>
@@ -19,7 +20,6 @@ import java.util.Scanner;
  */
 public class Main {
 
-    private static final Scanner sc = new Scanner(System.in);
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) {
@@ -41,6 +41,14 @@ public class Main {
         List<Stop> activeStops = query.findActiveStops();
         logger.info("Paradas activas encontradas: {}", activeStops.size());
         System.out.println("Primeras 10 paradas activas: " + activeStops.subList(0, Math.min(10, activeStops.size())));
+
+        List<TripStopEdge> edges = query.findConsecutiveStopEdges();
+        logger.info("Aristas consecutivas encontradas: {}", edges.size());
+        System.out.println("Primeras 10 aristas: " + edges.subList(0, Math.min(10, edges.size())));
+
+        List<StopTransition> grouped = query.findGroupedConsecutiveStopEdges();
+        logger.info("Pares agregados encontrados: {}", grouped.size());
+        System.out.println("Primeras 10 transiciones agrupadas: " + grouped.subList(0, Math.min(10, grouped.size())));
 
     }
 }
