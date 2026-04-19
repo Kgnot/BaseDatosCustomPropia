@@ -39,10 +39,6 @@ public class StopQuery {
         long start = System.currentTimeMillis();
         stopTimesTable().scan(st -> {
             activeStopIds.add(st.stopId());
-
-            if (activeStopIds.size() % 100000 == 0) {
-                System.out.print("X");
-            }
         });
 
         long timeScan = System.currentTimeMillis() - start;

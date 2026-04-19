@@ -20,8 +20,10 @@ import java.io.Serializable;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 import java.util.function.Consumer;
 
 public class TreeBPlusDisk<K extends Comparable<K> & Serializable, V extends Serializable> extends Tree<K, V> {
@@ -230,23 +232,41 @@ public class TreeBPlusDisk<K extends Comparable<K> & Serializable, V extends Ser
     // apartado para el tema de escanear  para iterara hojas secuencialmente
 
     public void scan(Consumer<V> action) {
-        if (root == null) return;
-
-        // bajamos a la primera hoja
-        Node<K, V> current = root;
-        while (current instanceof BPlusInternalNode<K, V>) {
-            current = context.getChild((BPlusInternalNode<K, V>) current, 0);
+        if (root == null) {
+            return;
         }
-        // Recorremos las listas enlazadas en hojas
-        while (current != null) {
-            if (current instanceof BPlusLeafNode<K, V> leaf) {
+
+        // Escaneo robusto: recorre el arbol por estructura (hijos), sin depender
+        // de la cadena nextLeaf, que puede quedar inconsistente en archivos antiguos.
+        Queue<Node<K, V>> pending = new ArrayDeque<>();
+        Set<Long> visitedPages = new HashSet<>();
+        pending.add(root);
+
+        while (!pending.isEmpty()) {
+            Node<K, V> node = pending.poll();
+            if (node == null) {
+                continue;
+            }
+
+            long pageId = node.getPageId();
+            if (pageId >= 0 && !visitedPages.add(pageId)) {
+                continue;
+            }
+
+            if (node instanceof BPlusLeafNode<K, V> leaf) {
                 for (NodeElement<K, V> element : leaf.getNodeElements()) {
                     action.accept(element.value());
                 }
-                current = leaf.getNextLeaf();
+                continue;
+            }
 
-            } else {
-                break;
+            if (node instanceof BPlusInternalNode<K, V> internal) {
+                for (int i = 0; i < internal.getChildPageIds().size(); i++) {
+                    Node<K, V> child = context.getChild(internal, i);
+                    if (child != null) {
+                        pending.add(child);
+                    }
+                }
             }
         }
     }

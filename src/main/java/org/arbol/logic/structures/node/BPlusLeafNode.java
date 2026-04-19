@@ -38,8 +38,14 @@ public final class BPlusLeafNode<K extends Comparable<K> & Serializable, V exten
         // Crear la nueva hoja derecha
         BPlusLeafNode<K, V> newRightNode = new BPlusLeafNode<>(this.maxSize, rightElements);
 
+        // Si esta hoja vino de disco, puede tener nextLeaf == null pero nextLeafPageId valido.
+        long previousNextLeafPageId = this.nextLeaf != null ? this.nextLeaf.getPageId() : this.nextLeafPageId;
+
         // Actualizar punteros de la lista enlazada
-        newRightNode.setNextLeaf(this.nextLeaf); // La nueva apunta a la que apuntaba yo
+        newRightNode.setNextLeaf(this.nextLeaf); // Mantener referencia en RAM si existe
+        if (newRightNode.nextLeaf == null) {
+            newRightNode.nextLeafPageId = previousNextLeafPageId; // Conservar enlace persistente
+        }
         this.setNextLeaf(newRightNode);          // Yo ahora apunto a la nueva
 
         // Actualizar este nodo (ahora es la izquierda)

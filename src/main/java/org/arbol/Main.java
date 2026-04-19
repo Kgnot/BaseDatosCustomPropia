@@ -36,10 +36,14 @@ public class Main {
         logger.info("Inicio de la Base de Datos B+ (Simulando SITP)");
         // cargo toda mi base de datos
         Database db = new Database();
-        logger.info("Parada portal Norte");
+        logger.info("Parada portal Usme");
         Table<String, Stop> stopsTable = db.getTable("stops");
-        List<Stop> found = stopsTable.findByField("stopName", "Portal Norte");
-
+        List<Stop> found = stopsTable.findByField("stopName", "AV. Caracas - CL 65 Sur Portal Usme");
+        // Z_53252_STOP,010A12,AV. Caracas - CL 65 Sur Portal Usme,4.5313231334599733,-74.118934559484245,0,,0
+        System.out.println("Parada encontrada: " + found);
+        System.out.println(
+                stopsTable.select("Z_53252_STOP")
+        );
         // aqui el join complejo:
         logger.info("Calculando paradas activas : ");
         StopQuery query = new StopQuery(db);
