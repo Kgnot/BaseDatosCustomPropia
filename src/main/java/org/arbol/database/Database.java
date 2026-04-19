@@ -1,6 +1,7 @@
 package org.arbol.database;
 
 import org.arbol.database.table.RoutesTable;
+import org.arbol.database.table.StopTimesByStopTable;
 import org.arbol.database.table.StopTimesTable;
 import org.arbol.database.table.StopsTable;
 import org.arbol.database.table.TripsTable;
@@ -20,6 +21,7 @@ public class Database {
         registerTable(new RoutesTable());
         registerTable(new TripsTable());
         registerTable(new StopTimesTable());
+        registerTable(new StopTimesByStopTable());
     }
 
     private void registerTable(Table<?, ?> table) {

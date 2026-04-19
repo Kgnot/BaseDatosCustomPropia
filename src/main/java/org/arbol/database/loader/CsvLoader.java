@@ -192,8 +192,10 @@ public class CsvLoader {
     public void loadStopTimes(String filePath) {
         logger.warn("INICIANDO CARGA MASIVA DE STOP_TIMES. Esto tomará tiempo...");
         Table<StopTimesKey, StopTimes> table = db.getTable("stop_times");
+        Table<String, String> byStopIndex = db.getTable("stop_times_by_stop");
         int inserted = 0;
         int duplicates = 0;
+        int indexDuplicates = 0;
         int malformed = 0;
         int lineNumber = 1;
         long startTime = System.currentTimeMillis();
@@ -230,6 +232,11 @@ public class CsvLoader {
                     Result<Void, NodeError.DuplicateKeyError> result = table.insert(key, st);
                     if (result.isSuccess()) {
                         inserted++;
+                        // Índice de presencia por stop_id: duplicados son esperados.
+                        Result<Void, NodeError.DuplicateKeyError> indexResult = byStopIndex.insert(stopId, stopId);
+                        if (indexResult.isFailure()) {
+                            indexDuplicates++;
+                        }
                     } else {
                         duplicates++;
                     }
@@ -248,9 +255,10 @@ public class CsvLoader {
 
         long endTime = System.currentTimeMillis();
         logger.info(
-                "StopTimes cargados: insertados={}, duplicados={}, inválidos={}. Tiempo: {} segundos",
+                "StopTimes cargados: insertados={}, duplicados={}, dupIndiceStopId={}, inválidos={}. Tiempo: {} segundos",
                 inserted,
                 duplicates,
+                indexDuplicates,
                 malformed,
                 (endTime - startTime) / 1000
         );
