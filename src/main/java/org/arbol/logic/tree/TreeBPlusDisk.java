@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
+import java.util.function.Consumer;
 
 public class TreeBPlusDisk<K extends Comparable<K> & Serializable, V extends Serializable> extends Tree<K, V> {
 
@@ -224,6 +225,30 @@ public class TreeBPlusDisk<K extends Comparable<K> & Serializable, V extends Ser
 
     public void close() {
         context.close();
+    }
+
+    // apartado para el tema de escanear  para iterara hojas secuencialmente
+
+    public void scan(Consumer<V> action) {
+        if (root == null) return;
+
+        // bajamos a la primera hoja
+        Node<K, V> current = root;
+        while (current instanceof BPlusInternalNode<K, V>) {
+            current = context.getChild((BPlusInternalNode<K, V>) current, 0);
+        }
+        // Recorremos las listas enlazadas en hojas
+        while (current != null) {
+            if (current instanceof BPlusLeafNode<K, V> leaf) {
+                for (NodeElement<K, V> element : leaf.getNodeElements()) {
+                    action.accept(element.value());
+                }
+                current = leaf.getNextLeaf();
+
+            } else {
+                break;
+            }
+        }
     }
 }
 

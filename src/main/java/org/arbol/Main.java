@@ -1,5 +1,6 @@
 package org.arbol;
 
+import org.arbol.bussines.StopQuery;
 import org.arbol.database.Database;
 import org.arbol.database.loader.CsvLoader;
 import org.arbol.database.models.Route;
@@ -16,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -32,46 +34,19 @@ public class Main {
 
     public static void main(String[] args) {
         logger.info("Inicio de la Base de Datos B+ (Simulando SITP)");
-
-        // 1. Cargar el esquema de la base de datos
-        // Esto automáticamente buscará/creará data/stops.dat y data/routes.dat
+        // cargo toda mi base de datos
         Database db = new Database();
+        logger.info("Parada portal Norte");
+        Table<String, Stop> stopsTable = db.getTable("stops");
+        List<Stop> found = stopsTable.findByField("stopName", "Portal Norte");
 
-        boolean running = true;
-        while (running) {
-            System.out.println("\n===== MENU SISTEMA SITP (Bogotá) =====");
-            System.out.println("1. Agregar Parada (Stops Table)");
-            System.out.println("2. Buscar Parada por ID");
-            System.out.println("3. Buscar Route por ID");
-            System.out.println("4. Buscar Trip por ID");
-            System.out.println("5. Buscar StopTime por trip_id + stop_sequence");
-            System.out.println("6. Listar todas las paradas");
-            System.out.println("7. Listar paradas paginado");
-            System.out.println("8. Cargar datos");
-            System.out.println("9. Resetear archivos de data (.dat)");
-            System.out.println("10. Salir");
-            System.out.print("Opción: ");
+        // aqui el join complejo:
+        logger.info("Calculando paradas activas : ");
+        StopQuery query = new StopQuery(db);
 
-            String option = sc.nextLine().trim();
+        List<Stop> activeStops = query.findActiveStops();
+        logger.info("Paradas activas encontradas: {}", activeStops.size());
 
-            switch (option) {
-                case "1" -> insertarStop(db);
-                case "2" -> buscarStop(db);
-                case "3" -> buscarRoute(db);
-                case "4" -> buscarTrip(db);
-                case "5" -> buscarStopTime(db);
-                case "6" -> listarTodasLasParadas(db);
-                case "7" -> listarParadasPaginado(db);
-                case "8" -> cargarDatos(db);
-                case "9" -> db = resetearData(db);
-                case "10" -> {
-                    running = false;
-                    db.close();
-                    System.out.println("Saliendo...");
-                }
-                default -> System.out.println("Opción inválida");
-            }
-        }
     }
 
     private static Database resetearData(Database currentDb) {
