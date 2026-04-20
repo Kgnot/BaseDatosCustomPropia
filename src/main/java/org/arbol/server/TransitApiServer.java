@@ -12,12 +12,16 @@ import org.slf4j.LoggerFactory;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
 public class TransitApiServer {
 
     private static final Logger logger = LoggerFactory.getLogger(TransitApiServer.class);
+    private static final int DEFAULT_EXPORT_LIMIT = 10_000;
+    private static final int MAX_EXPORT_LIMIT = 50_000;
 
     public static void main(String[] args) throws Exception {
         int port = resolvePort(args);
@@ -94,8 +98,63 @@ public class TransitApiServer {
 
                 if ("/edges/consecutive".equals(target)) {
                     List<?> edges = stopQuery.findConsecutiveStopEdges();
-                    logger.info("GET /edges/consecutive -> {}", edges.subList(0,10));
+                    int previewSize = Math.min(10, edges.size());
+                    logger.info("GET /edges/consecutive -> {}", edges.subList(0, previewSize));
                     writeJson(response, HttpServletResponse.SC_OK, edges);
+                    baseRequest.setHandled(true);
+                    return;
+                }
+
+                if ("/exports/status".equals(target)) {
+                    writeJson(
+                            response,
+                            HttpServletResponse.SC_OK,
+                            Map.of(
+                                    "service", "trip-stop-edges-exporter",
+                                    "status", "ok"
+                            )
+                    );
+                    baseRequest.setHandled(true);
+                    return;
+                }
+
+                if ("/exports/trip-stop-edges".equals(target)) {
+                    int limit = parseLimit(request.getParameter("limit"));
+                    int offset = parseCursorToOffset(request.getParameter("cursor"));
+
+                    long start = System.currentTimeMillis();
+                    List<?> edges = stopQuery.findConsecutiveStopEdges();
+                    int total = edges.size();
+
+                    int fromIndex = Math.max(0, Math.min(offset, total));
+                    int toIndex = Math.min(fromIndex + limit, total);
+                    List<?> items = edges.subList(fromIndex, toIndex);
+
+                    boolean hasMore = toIndex < total;
+                    String nextCursor = hasMore ? encodeOffsetCursor(toIndex) : null;
+
+                    writeJson(
+                            response,
+                            HttpServletResponse.SC_OK,
+                            Map.of(
+                                    "limit", limit,
+                                    "count", items.size(),
+                                    "total", total,
+                                    "hasMore", hasMore,
+                                    "nextCursor", nextCursor,
+                                    "items", items
+                            )
+                    );
+
+                    logger.info(
+                            "GET /exports/trip-stop-edges?limit={}&offset={} -> {} items (total={}) en {} ms",
+                            limit,
+                            fromIndex,
+                            items.size(),
+                            total,
+                            System.currentTimeMillis() - start
+                    );
+
                     baseRequest.setHandled(true);
                     return;
                 }
@@ -107,6 +166,42 @@ public class TransitApiServer {
                 writeJson(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, Map.of("error", "Error interno", "detail", e.getMessage()));
                 baseRequest.setHandled(true);
             }
+        }
+
+        private int parseLimit(String rawLimit) {
+            if (rawLimit == null || rawLimit.isBlank()) {
+                return DEFAULT_EXPORT_LIMIT;
+            }
+
+            int parsed = Integer.parseInt(rawLimit);
+            if (parsed <= 0) {
+                throw new IllegalArgumentException("limit debe ser mayor a 0");
+            }
+
+            return Math.min(parsed, MAX_EXPORT_LIMIT);
+        }
+
+        private int parseCursorToOffset(String cursor) {
+            if (cursor == null || cursor.isBlank()) {
+                return 0;
+            }
+
+            try {
+                String decoded = new String(Base64.getUrlDecoder().decode(cursor), StandardCharsets.UTF_8);
+                int offset = Integer.parseInt(decoded);
+                if (offset < 0) {
+                    throw new IllegalArgumentException("cursor inválido");
+                }
+                return offset;
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("cursor inválido");
+            }
+        }
+
+        private String encodeOffsetCursor(int offset) {
+            return Base64.getUrlEncoder()
+                    .withoutPadding()
+                    .encodeToString(String.valueOf(offset).getBytes(StandardCharsets.UTF_8));
         }
 
         private void writeJson(HttpServletResponse response, int status, Object body) throws IOException {
