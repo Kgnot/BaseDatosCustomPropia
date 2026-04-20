@@ -50,6 +50,53 @@ public class StopQuery {
         return db.getTable("routes");
     }
 
+    public List<String> findTripIds(int offset, int limit) {
+        if (offset < 0) {
+            throw new IllegalArgumentException("offset no puede ser negativo");
+        }
+        if (limit < 0) {
+            throw new IllegalArgumentException("limit no puede ser negativo");
+        }
+        if (limit == 0) {
+            return List.of();
+        }
+
+        List<String> result = new ArrayList<>();
+        class Counter {
+            int index;
+        }
+        Counter counter = new Counter();
+
+        tripsTable().scanEntries(entry -> {
+            int currentIndex = counter.index++;
+            if (currentIndex < offset || result.size() >= limit) {
+                return;
+            }
+            result.add(entry.key());
+        });
+
+        return result;
+    }
+
+    @SuppressWarnings("unused")
+    public boolean tripExists(String tripId) {
+        if (tripId == null || tripId.isBlank()) {
+            return false;
+        }
+        return tripsTable().select(tripId).isSuccess();
+    }
+
+    @SuppressWarnings("unused")
+    public int countTripIds() {
+        class Counter {
+            int value;
+        }
+        Counter counter = new Counter();
+
+        tripsTable().scanEntries(entry -> counter.value++);
+        return counter.value;
+    }
+
     public List<Stop> findActiveStops() {
         logger.info("Ejecutando JOIN: Encontrando paradas activas...");
 
@@ -162,6 +209,84 @@ public class StopQuery {
         );
 
         logger.info("Proyeccion completada. Aristas calculadas: {}", edges.size());
+        return edges;
+    }
+
+    public List<TripStopEdge> findConsecutiveStopEdgesByTripId(String tripId) {
+        if (tripId == null || tripId.isBlank()) {
+            throw new IllegalArgumentException("tripId es requerido");
+        }
+
+        logger.info("Ejecutando proyeccion de aristas consecutivas para trip {}...", tripId);
+
+        Result<Trips, ?> tripResult = tripsTable().select(tripId);
+        if (tripResult.isFailure()) {
+            return List.of();
+        }
+
+        String routeId = tripResult.unwrap().routeId();
+        if (routesTable().select(routeId).isFailure()) {
+            return List.of();
+        }
+
+        List<TripStopEdge> edges = new ArrayList<>();
+
+        class PreviousEntryHolder {
+            NodeElement<StopTimesKey, StopTimes> value;
+        }
+        PreviousEntryHolder previous = new PreviousEntryHolder();
+        class TripBoundary {
+            boolean passedTargetTrip;
+        }
+        TripBoundary boundary = new TripBoundary();
+
+        stopTimesTable().scanEntries((NodeElement<StopTimesKey, StopTimes> current) -> {
+            if (boundary.passedTargetTrip) {
+                return;
+            }
+
+            String currentTripId = current.key().tripId();
+            int cmp = currentTripId.compareTo(tripId);
+            if (cmp < 0) {
+                previous.value = null;
+                return;
+            }
+            if (cmp > 0) {
+                boundary.passedTargetTrip = true;
+                return;
+            }
+
+            NodeElement<StopTimesKey, StopTimes> prev = previous.value;
+            if (prev != null) {
+                StopTimesKey prevKey = prev.key();
+                StopTimes prevValue = prev.value();
+                StopTimesKey currentKey = current.key();
+                StopTimes currentValue = current.value();
+
+                boolean consecutive = currentKey.stopSequence() == prevKey.stopSequence() + 1;
+                if (consecutive) {
+                    long departureSec = prevValue.departureTime().getTime() / 1000L;
+                    long arrivalSec = parseGtfsTimeToSeconds(currentValue.arrivalTime());
+                    double travelMin = (arrivalSec - departureSec) / 60.0;
+
+                    if (travelMin > 0) {
+                        edges.add(new TripStopEdge(
+                                prevValue.stopId(),
+                                currentValue.stopId(),
+                                tripId,
+                                routeId,
+                                prevKey.stopSequence(),
+                                travelMin
+                        ));
+                    }
+                }
+            }
+
+            previous.value = current;
+        });
+
+        edges.sort(Comparator.comparing(TripStopEdge::fromStopSequence));
+        logger.info("Proyeccion por trip {} completada. Aristas calculadas: {}", tripId, edges.size());
         return edges;
     }
 
